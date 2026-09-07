@@ -4,6 +4,8 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 
 > **Built with Google Antigravity**: This project was developed using **Google Antigravity**.
 
+![JobAppTracker Screenshot](JobApplicationTracker.jpg)
+
 ---
 
 ## Key Features
