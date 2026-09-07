@@ -1,0 +1,123 @@
+# JobAppTracker
+
+A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a local **SQLite** database, designed specifically for job seekers to track, audit, organize, and report on job applications and recruitment agency submissions.
+
+> **Built with Google Antigravity**: This project was developed using **Google Antigravity**.
+
+---
+
+## Key Features
+
+### 1. Application & Agency Submission Tracking
+- **Standard Job Applications**: Record applied date, job title, company name, agency (if applicable), application method, source channel, salary/rate, location, URL link, and full job description.
+- **Speculative Agency "CV" Submissions**: Dedicated 1-click toggle and button to log speculative CV submissions to recruitment agencies (auto-titled as `"CV"`).
+- **Salary / Rate Tracking**: Record compensation details (e.g. `£70,000` or `£550/day`), prominently displayed in both the main dashboard list and reports.
+- **Job Posting URL**: Direct clickable browser launch to original job ads or company portals.
+
+### 2. Full Job Specifications & Document Attachments
+- **Full Pasted Job Spec**: Dedicated multi-line scrollable text viewer/editor with live character count and a 1-click **"Copy Spec"** button.
+- **Managed File Attachments**: Attach PDFs, Word documents (`.docx`), text files, or images. Files are safely copied to a managed local folder (`%LOCALAPPDATA%\JobAppTracker\Attachments\{application_id}\`) with options to open directly or reveal in Windows File Explorer.
+
+### 3. Comprehensive Audit Trail & History
+- **Date-Stamped Event Log**: Full reverse-chronological timeline of all events recorded against each application.
+- **Automated Tracking**: Logs initial submission, status transitions (`Applied ➔ 1st Interview`), file attachments, notes, and recruiter phone calls.
+- **Automatic Date Refresh**: Refreshes the application's `LastUpdatedDate` whenever any activity occurs.
+
+### 4. Staleness Tracking & Smart Inactivity Alerts
+- **Configurable Inactivity Threshold**: Defaults to 14 days without updates or response.
+- **Visual Alert Badges**: Amber alert pills (`⚠️ Stale (X d inactive)`) and relative age indicators (`Updated today`, `Updated yesterday`, `X d ago`).
+- **Quick Filters**: Dedicated **"⚠️ Stale"** filter button on the main dashboard to immediately isolate dormant applications needing follow-up.
+- **Finalized Applications**: Selecting final outcomes (`Accepted`, `Rejected`, `Closed`, `Withdrawn`) halts staleness tracking.
+
+### 5. Multi-Criteria Filtering & Sort Sequencing
+- **Flexible Sorting**: Sort by **Last Activity Date** or **Created / Application Date** (both Ascending and Descending).
+- **Agency Filter**: Dedicated agency dropdown to isolate multiple positions or CV submissions handled by the same agency (e.g. *Hays*, *Michael Page*).
+- **Dynamic Source Management**: Add custom sources (e.g. *Otta*, *Cord*, *AngelList*) on the fly, with auto-persistence to SQLite and full management in Settings.
+- **"All except closed/complete" Filter**: Quick selection in both the dashboard and reports to filter out closed, withdrawn, or rejected applications, displaying only active pursuits.
+
+### 6. Printable Reports, Dossiers & Data Export
+- **Printable HTML Reports ("Job Applications Report")**: Professional browser-based reports formatted with `@media print` styling, ready to print or save to PDF. Includes salary/rate, active sort order, summary KPI cards, and an option to include full audit trails.
+- **Single Application Detailed Report / Dossier**: Generate a full dossier for a single vacancy including full job spec, complete chronological history timeline, and a metadata list of attached documents (without exposing file binaries).
+- **CSV Export**: Export all records or filtered views to CSV for Microsoft Excel and Google Sheets.
+- **Summary Clipboard Export**: Copy formatted markdown/text summaries directly to the clipboard.
+
+---
+
+## Project Structure
+
+```
+JobAppTracker/
+├── Data/
+│   └── DatabaseService.cs       # SQLite database connection, migrations, and CRUD operations
+├── Models/
+│   ├── ApplicationFilter.cs     # Multi-criteria filter and sort parameters
+│   ├── ApplicationUpdate.cs     # Audit trail event model
+│   ├── Attachment.cs            # File attachment metadata model
+│   ├── JobApplication.cs        # Primary job application data model
+│   └── ReportSummary.cs         # Aggregate KPI metrics model
+├── Services/
+│   ├── AttachmentService.cs     # Attachment management, file launching, and browser opening
+│   └── ExportService.cs         # HTML printable report, single-app dossier, and CSV export engine
+├── ViewModels/
+│   ├── MainViewModel.cs         # WPF MVVM ViewModel for dashboard state, filtering, and commands
+│   └── RelayCommand.cs          # ICommand implementation
+├── Views/
+│   ├── ApplicationEditWindow.xaml # Create / Edit application dialog & attachment manager
+│   ├── ReportsWindow.xaml         # Dedicated reporting, analytics & export window
+│   ├── SettingsWindow.xaml        # Preferences, staleness threshold & custom sources manager
+│   └── UpdateDialog.xaml          # Add note / status update dialog
+├── Converters/                  # WPF XAML value converters (staleness, visibility, dates)
+├── Tests/                       # Automated standalone verification test suite (14 test suites)
+│   ├── JobAppTracker.Tests.csproj
+│   └── Program.cs
+├── MainWindow.xaml              # Primary application window & interactive dashboard
+├── App.xaml                     # Application entry point & global modern theme styling
+├── JobAppTracker.csproj         # Main .NET 8 WPF project file
+└── .gitignore                   # Git exclusion rules for .NET, Visual Studio, and OS files
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+- **Windows 10 / 11**
+- **.NET 8.0 SDK** (or later)
+
+### Build & Run
+
+1. **Clone or navigate to the repository**:
+   ```powershell
+   cd h:\Dev\AntiGravity\JobAppTracker
+   ```
+
+2. **Restore dependencies & build**:
+   ```powershell
+   dotnet build -c Release
+   ```
+
+3. **Run the desktop application**:
+   ```powershell
+   dotnet run
+   ```
+   *Or launch the compiled binary directly from `bin\Release\net8.0-windows\JobAppTracker.exe`.*
+
+---
+
+## Running the Automated Tests
+
+The solution includes a comprehensive, standalone automated test suite covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, and the "All except closed/complete" filter:
+
+```powershell
+dotnet run --project Tests/JobAppTracker.Tests.csproj
+```
+
+---
+
+## Data Storage Locations
+
+By default, application data and attachments are stored locally on your machine in:
+- **SQLite Database**: `%LOCALAPPDATA%\JobAppTracker\job_applications.db`
+- **File Attachments**: `%LOCALAPPDATA%\JobAppTracker\Attachments\{application_id}\`
+
+No external cloud services or databases are required; your job search data remains 100% private and offline on your computer.

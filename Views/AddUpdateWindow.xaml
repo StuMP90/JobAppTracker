@@ -1,0 +1,94 @@
+<Window x:Class="JobAppTracker.Views.AddUpdateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Add Update / Audit Event" Height="480" Width="560"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8FAFC"
+        FontFamily="Segoe UI"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,16" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,0,0,10">
+            <StackPanel>
+                <TextBlock Text="📝 Log Update &amp; Audit Trail" FontSize="18" FontWeight="Bold" Foreground="#0F172A"/>
+                <TextBlock x:Name="TxtAppHeader" Text="For: Senior Engineer at Google" Foreground="#64748B" FontSize="12" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Form Body -->
+        <StackPanel Grid.Row="1">
+            <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Update Date *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <DatePicker x:Name="DpUpdateDate" Height="34"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Event / Update Type *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <ComboBox x:Name="CmbUpdateType" Height="34" SelectionChanged="CmbUpdateType_SelectionChanged">
+                        <ComboBoxItem Content="Status Change" IsSelected="True"/>
+                        <ComboBoxItem Content="Interview Scheduled / Held"/>
+                        <ComboBoxItem Content="Follow-up Sent"/>
+                        <ComboBoxItem Content="Recruiter Phone Call"/>
+                        <ComboBoxItem Content="Technical Assessment"/>
+                        <ComboBoxItem Content="General Note"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="Application Status" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <ComboBox x:Name="CmbNewStatus" Height="34"/>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="Details / Notes *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <TextBox x:Name="TxtNotes" Height="140" TextWrapping="Wrap" AcceptsReturn="True" 
+                         VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="90" Height="34" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnCancel_Click"/>
+                <Button Content="Save Update" Width="120" Height="34" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnSave_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

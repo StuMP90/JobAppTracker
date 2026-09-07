@@ -1,0 +1,87 @@
+<Window x:Class="JobAppTracker.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Settings &amp; Preferences" Height="580" Width="580"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8FAFC"
+        FontFamily="Segoe UI"
+        ResizeMode="NoResize">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="⚙️ Application Settings" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,16"/>
+
+        <StackPanel Grid.Row="1">
+            <!-- Staleness Setting -->
+            <Border Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Staleness Alert Threshold" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    <TextBlock Text="Applications without an update for this many days will be flagged as stale." FontSize="12" Foreground="#64748B" Margin="0,2,0,8"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="TxtStaleDays" Width="80" Height="30" Padding="6,2" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="days without response/activity" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="#475569"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Application Sources Management -->
+            <Border Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14" Margin="0,0,0,16">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,6">
+                        <TextBlock Text="Job Application Sources" FontWeight="SemiBold" Foreground="#0F172A" VerticalAlignment="Center"/>
+                        <TextBlock Text="Job boards &amp; platforms" FontSize="11" Foreground="#94A3B8" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </DockPanel>
+                    <TextBlock Text="Manage the sources available when logging applications (e.g. LinkedIn, Indeed, etc.):" FontSize="12" Foreground="#64748B" Margin="0,0,0,8"/>
+                    
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="TxtNewSource" Height="30" Padding="6,2" VerticalContentAlignment="Center" 
+                                 ToolTip="Enter new source name (e.g. Otta, Cord, etc.)"/>
+                        <Button Grid.Column="2" Content="+ Add Source" Padding="12,0" Height="30" Background="#2563EB" 
+                                Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnAddSource_Click"/>
+                    </Grid>
+
+                    <ListBox x:Name="LstSources" MaxHeight="130" BorderBrush="#E2E8F0" Background="#F8FAFC">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel LastChildFill="True" Margin="4,2">
+                                    <Button DockPanel.Dock="Right" Content="✕" Padding="6,1" FontSize="10" 
+                                            Background="#FEE2E2" Foreground="#DC2626" BorderBrush="#FECACA" 
+                                            Click="BtnDeleteSource_Click" Tag="{Binding}" ToolTip="Delete source"/>
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" FontWeight="Medium" Foreground="#334155"/>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <!-- Database Location -->
+            <Border Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14">
+                <StackPanel>
+                    <TextBlock Text="Local SQLite Database" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    <TextBlock x:Name="TxtDbPath" Text="..." FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,4,0,8"/>
+                    <Button Content="📂 Open Data Folder" HorizontalAlignment="Left" Padding="10,5" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnOpenFolder_Click"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <Border Grid.Row="2" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="80" Height="32" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnCancel_Click"/>
+                <Button Content="Save Settings" Width="110" Height="32" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnSave_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

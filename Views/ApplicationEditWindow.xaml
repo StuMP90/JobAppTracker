@@ -1,0 +1,186 @@
+<Window x:Class="JobAppTracker.Views.ApplicationEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Job Application" Height="680" Width="760"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8FAFC"
+        FontFamily="Segoe UI"
+        ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,16" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,0,0,12">
+            <DockPanel>
+                <TextBlock x:Name="TxtHeader" Text="✨ New Job Application" FontSize="20" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center"/>
+                <CheckBox x:Name="ChkCvToAgency" Content="📄 Speculative CV to Agency" HorizontalAlignment="Right" VerticalAlignment="Center" 
+                          FontWeight="SemiBold" Foreground="#2563EB" Margin="0,0,8,0" Checked="ChkCvToAgency_Checked" Unchecked="ChkCvToAgency_Unchecked"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Scrollable Form Body -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+            <StackPanel>
+                <!-- Row 1: Date & Title -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Application Date *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <DatePicker x:Name="DpAppliedDate" Height="34"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Job Title *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <TextBox x:Name="TxtJobTitle" Height="34"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 2: Company & Agency -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Company / Employer *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <TextBox x:Name="TxtCompany" Height="34"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Recruitment Agency (if any)" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <TextBox x:Name="TxtAgency" Height="34"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 3: Source, Method & Status -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <DockPanel Margin="0,0,0,6">
+                            <TextBlock Text="Source *" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <Button Content="+ Add" HorizontalAlignment="Right" Padding="6,1" FontSize="11" 
+                                    Background="Transparent" BorderThickness="0" Foreground="#2563EB" FontWeight="SemiBold" Cursor="Hand" Click="BtnAddSource_Click"/>
+                        </DockPanel>
+                        <ComboBox x:Name="CmbSource" Height="34" IsEditable="True" ToolTip="Select an existing source or type a new one"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Method *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbMethod" Height="34" IsEditable="True"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Current Status *" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbStatus" Height="34"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 4: Salary, Location & Link -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="1.5*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Salary / Rate" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <TextBox x:Name="TxtSalary" Height="34" ToolTip="e.g. £65,000 or £450/day"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Location" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <TextBox x:Name="TxtLocation" Height="34" ToolTip="e.g. Hybrid (London) or Remote"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Job Posting URL" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <TextBox x:Name="TxtJobUrl" Height="34"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 5: Job Spec Details (pasted text) -->
+                <StackPanel Margin="0,0,0,16">
+                    <DockPanel Margin="0,0,0,6">
+                        <TextBlock Text="Job Spec / Details (Paste from website)" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtSpecCount" Text="0 characters" HorizontalAlignment="Right" Foreground="#94A3B8" FontSize="11"/>
+                    </DockPanel>
+                    <TextBox x:Name="TxtJobSpec" Height="140" TextWrapping="Wrap" AcceptsReturn="True" 
+                             VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                             TextChanged="TxtJobSpec_TextChanged"/>
+                </StackPanel>
+
+                <!-- Row 6: Initial File Attachments (e.g. PDF spec) -->
+                <Border Background="#F1F5F9" CornerRadius="6" Padding="14" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,16">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="📎 File Attachments (e.g. PDF Job Spec, CV)" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <Button Content="+ Browse Files..." HorizontalAlignment="Right" Padding="10,4" Background="#E2E8F0" 
+                                    BorderBrush="#CBD5E1" Click="BtnAddFiles_Click"/>
+                        </DockPanel>
+                        <ListBox x:Name="LstFiles" Margin="0,8,0,0" MaxHeight="80" Background="White" BorderBrush="#CBD5E1">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel LastChildFill="True">
+                                        <TextBlock Text="📄 " VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- Row 7: Initial Note / Audit Comment -->
+                <StackPanel x:Name="PnlInitialNotes">
+                    <TextBlock Text="Initial Audit Log Note" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <TextBox x:Name="TxtInitialNote" Height="34" Text="Application submitted."/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <Border Grid.Row="2" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+            <DockPanel>
+                <Button x:Name="BtnViewReport" Content="📄 View Report" Padding="12,0" Height="34" Background="#F8FAFC" BorderBrush="#CBD5E1" Click="BtnViewReport_Click" Visibility="Collapsed" HorizontalAlignment="Left" ToolTip="View &amp; Print full report dossier for this application"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel" Width="90" Height="34" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnCancel_Click"/>
+                    <Button Content="Save Application" Width="140" Height="34" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnSave_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

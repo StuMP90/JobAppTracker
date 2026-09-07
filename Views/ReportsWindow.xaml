@@ -1,0 +1,331 @@
+<Window x:Class="JobAppTracker.Views.ReportsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="clr-namespace:JobAppTracker.Converters"
+        mc:Ignorable="d"
+        Title="Job Applications Reports &amp; Analytics" Height="750" Width="1050"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8FAFC"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <conv:HexToBrushConverter x:Key="HexToBrushConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,16" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,0,0,14">
+            <DockPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="📊 Job Applications &amp; Status Report" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
+                    <TextBlock Text="Comprehensive metrics, status summaries, and export tools" Foreground="#64748B" FontSize="13" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="📋 Copy Summary" Padding="12,7" Margin="0,0,10,0" Background="#FFFFFF" BorderBrush="#CBD5E1" Click="BtnCopySummary_Click"/>
+                    <Button Content="📊 Export CSV" Padding="12,7" Margin="0,0,10,0" Background="#FFFFFF" BorderBrush="#CBD5E1" Click="BtnExportCsv_Click"/>
+                    <Button Content="📄 Single App Report" Padding="12,7" Margin="0,0,10,0" Background="#FFFFFF" BorderBrush="#CBD5E1" Click="BtnSingleReport_Click" ToolTip="View &amp; Print complete dossier report for selected application"/>
+                    <Button Content="🖨️ Printable HTML Report" Padding="14,7" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnExportHtml_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Filter Ribbon -->
+        <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14" Margin="0,0,0,16">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="145"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Search Role / Company" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBox x:Name="TxtSearch" Height="30" Padding="6,2" TextChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Status" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbStatus" Height="30" SelectionChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Agency" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbAgency" Height="30" SelectionChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="6">
+                        <TextBlock Text="Source" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbSource" Height="30" SelectionChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="8">
+                        <TextBlock Text="Sort Sequence" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbSort" Height="30" SelectionChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="10">
+                        <TextBlock Text="From Date" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <DatePicker x:Name="DpFromDate" Height="30" SelectedDateChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="12">
+                        <TextBlock Text="To Date" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <DatePicker x:Name="DpToDate" Height="30" SelectedDateChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="14" Content="Reset" VerticalAlignment="Bottom" Height="30" Padding="12,0" 
+                            Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnResetFilters_Click"/>
+                </Grid>
+
+                <Border Margin="0,12,0,0" Padding="0,10,0,0" BorderBrush="#F1F5F9" BorderThickness="0,1,0,0">
+                    <DockPanel>
+                        <CheckBox x:Name="ChkIncludeAudit" Content="Include audit trail &amp; history events for listed vacancies" 
+                                  FontWeight="SemiBold" Foreground="#1E293B" VerticalAlignment="Center"
+                                  Checked="Filter_Changed" Unchecked="Filter_Changed"/>
+                        <TextBlock Text="💡 When enabled, prints and exports full update history (status changes, recruiter notes, interview logs) for each vacancy" 
+                                   Foreground="#64748B" FontSize="11" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area: KPIs + Grid -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- KPI Cards -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock x:Name="TxtTotalCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center"/>
+                        <TextBlock Text="TOTAL MATCHING" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock x:Name="TxtActiveCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Center"/>
+                        <TextBlock Text="ACTIVE / IN-PROGRESS" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4" Background="#FFF7ED" CornerRadius="6" BorderBrush="#FDBA74" BorderThickness="1" Padding="12">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock x:Name="TxtStaleCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#EA580C" HorizontalAlignment="Center"/>
+                        <TextBlock Text="⚠️ STALE (14D+ INACTIVE)" FontSize="10" FontWeight="SemiBold" Foreground="#EA580C" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="6" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock x:Name="TxtInterviewCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#D97706" HorizontalAlignment="Center"/>
+                        <TextBlock Text="INTERVIEWS / OFFERS" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="8" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock x:Name="TxtFinalCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                        <TextBlock Text="ACCEPTED / CLOSED" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Table of Applications -->
+            <Border Grid.Row="1" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1">
+                <DataGrid x:Name="GridReport" AutoGenerateColumns="False" IsReadOnly="True" 
+                          CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#F1F5F9" HeadersVisibility="Column"
+                          BorderThickness="0" Background="Transparent"
+                          RowHeight="44"
+                          SelectionChanged="GridReport_SelectionChanged"
+                          MouseDoubleClick="GridReport_MouseDoubleClick"
+                          RowDetailsVisibilityMode="VisibleWhenSelected">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F8FAFC"/>
+                            <Setter Property="Foreground" Value="#475569"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="12,10"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="📄 View Application Dossier / Report" Click="MenuSingleReport_Click"/>
+                            <Separator/>
+                            <MenuItem Header="📋 Copy Summary" Click="BtnCopySummary_Click"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.RowDetailsTemplate>
+                        <DataTemplate>
+                            <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Margin="12,4,12,10" Padding="12">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,8">
+                                        <TextBlock Text="📜 Audit Trail &amp; Events" FontWeight="Bold" FontSize="12" Foreground="#0F172A"/>
+                                        <TextBlock Text="{Binding AuditTrail.Count, StringFormat='({0} recorded)'}" Foreground="#64748B" FontSize="11" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                    
+                                    <ItemsControl ItemsSource="{Binding AuditTrail}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="0,5,0,5">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="85"/>
+                                                            <ColumnDefinition Width="24"/>
+                                                            <ColumnDefinition Width="220"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="{Binding UpdateDateFormatted}" Foreground="#64748B" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding TypeIcon}" FontSize="12" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding SummaryTitle}" FontWeight="SemiBold" Foreground="#1E293B" FontSize="11" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="3" Text="{Binding Notes}" Foreground="#475569" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="(No audit trail events recorded)" FontStyle="Italic" Foreground="#94A3B8" FontSize="11" Margin="0,4,0,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasAuditTrail}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </DataGrid.RowDetailsTemplate>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Applied" Binding="{Binding AppliedDateFormatted}" SortMemberPath="AppliedDate" Width="95"/>
+                        <DataGridTemplateColumn Header="Job Title / Role" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DisplayTitle}" FontWeight="SemiBold" Foreground="#0F172A"/>
+                                        <TextBlock Text="📄 Speculative CV" FontSize="10" Foreground="#0284C7" Visibility="{Binding IsCvToAgency, Converter={StaticResource BoolToVisConverter}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Company &amp; Agency" Width="180">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Company}" FontWeight="SemiBold" Foreground="#1E293B"/>
+                                        <TextBlock Text="{Binding Agency, StringFormat='Agency: {0}'}" FontSize="11" Foreground="#64748B" 
+                                                   Visibility="{Binding HasAgency, Converter={StaticResource BoolToVisConverter}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Salary / Rate" Binding="{Binding SalaryOrRate}" Width="110">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="Foreground" Value="#047857"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="100"/>
+
+                        <DataGridTemplateColumn Header="Status" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                        <Border Background="{Binding StatusBadgeColor, Converter={StaticResource HexToBrushConverter}}" 
+                                                CornerRadius="10" Padding="8,2">
+                                            <TextBlock Text="{Binding CurrentStatus}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Last Activity" SortMemberPath="LastUpdatedDate" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding LastUpdatedFormatted}" FontSize="12" Foreground="#334155"/>
+                                        <TextBlock Text="{Binding StalenessText}" FontSize="10" 
+                                                   Foreground="{Binding IsStale, Converter={StaticResource BoolToVisConverter}, ConverterParameter='staleColor'}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Spec Snippet" Width="1.5*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding JobSpecText}" TextTrimming="CharacterEllipsis" FontSize="11" 
+                                               Foreground="#64748B" VerticalAlignment="Center" MaxHeight="32"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="3" Margin="0,14,0,0">
+            <DockPanel>
+                <TextBlock x:Name="TxtFooterStatus" Text="Showing 0 applications" Foreground="#64748B" VerticalAlignment="Center"/>
+                <Button Content="Close" HorizontalAlignment="Right" Width="90" Height="32" Background="#FFFFFF" BorderBrush="#CBD5E1" Click="BtnClose_Click"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

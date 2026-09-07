@@ -1,0 +1,43 @@
+## .NET / Visual Studio / Build Artifacts
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+
+## Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+## JetBrains Rider / ReSharper
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+## OS / Windows Artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+## Test & Temporary outputs
+TestResults/
+*.log
+*.tmp
+*.temp
+
+## SQLite & Local User Data (if placed in repo)
+*.db
+*.db-shm
+*.db-wal
+Attachments/
+Export/
+Report*.html
+Report*.csv

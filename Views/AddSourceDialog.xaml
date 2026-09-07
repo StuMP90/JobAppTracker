@@ -1,0 +1,36 @@
+<Window x:Class="JobAppTracker.Views.AddSourceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Add Source" Height="220" Width="420"
+        WindowStartupLocation="CenterOwner"
+        Background="#F8FAFC"
+        FontFamily="Segoe UI"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock Text="➕ Add New Job Source" FontSize="16" FontWeight="Bold" Foreground="#0F172A"/>
+            <TextBlock Text="Enter the source name (e.g. Otta, Cord, Tech Meetup, etc.):" FontSize="12" Foreground="#64748B" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1">
+            <TextBox x:Name="TxtSourceName" Height="34" FontSize="13" Padding="8,6" VerticalContentAlignment="Center"
+                     KeyDown="TxtSourceName_KeyDown"/>
+        </StackPanel>
+
+        <Border Grid.Row="2" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Width="80" Height="32" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnCancel_Click"/>
+                <Button Content="Add Source" Width="100" Height="32" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnAdd_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
