@@ -546,8 +546,64 @@ Key Requirements:
 
                 Console.WriteLine("[PASS] Test 18: Same-day ordering and consecutive deduplication verified.");
 
+                // --- TEST 19: Editing Audit Records for Status Correction (Without Changing Dates) ---
+                Console.WriteLine("\n--- Running Test 19: Editing Audit Records (Without Changing Dates) ---");
+                var editApp = new JobApplication
+                {
+                    AppliedDate = new DateTime(2026, 9, 1),
+                    JobTitle = "Solutions Architect",
+                    Company = "CloudGlobal Ltd",
+                    Source = "Indeed",
+                    CurrentStatus = "Applied"
+                };
+                int editAppId = db.SaveApplication(editApp);
+
+                // Add audit events
+                var date1 = new DateTime(2026, 9, 3);
+                var date2 = new DateTime(2026, 9, 5);
+                db.AddApplicationUpdate(editAppId, date1, "StatusChange", "Screening", "Initial phone screen");
+                db.AddApplicationUpdate(editAppId, date2, "StatusChange", "1st Interview", "Initial technical interview");
+
+                var initialUpdates = db.GetUpdates(editAppId);
+                var screenUpdate = initialUpdates.First(u => u.NewStatus == "Screening");
+                var interviewUpdate = initialUpdates.First(u => u.NewStatus == "1st Interview");
+                var originalScreenDate = screenUpdate.UpdateDate;
+                var originalInterviewDate = interviewUpdate.UpdateDate;
+                var originalScreenCreatedAt = screenUpdate.CreatedAt;
+
+                // 1. Correct intermediate update status from 'Screening' to 'Technical Assessment'
+                db.UpdateApplicationUpdate(screenUpdate.Id, "StatusChange", "Technical Assessment", "Corrected: completed online coding assessment rather than phone screen");
+
+                var updatesAfterEdit1 = db.GetUpdates(editAppId);
+                var editedScreenUpdate = updatesAfterEdit1.First(u => u.Id == screenUpdate.Id);
+
+                Assert(editedScreenUpdate.NewStatus == "Technical Assessment", "Update status successfully corrected to 'Technical Assessment'");
+                Assert(editedScreenUpdate.Notes.Contains("Corrected: completed online coding assessment"), "Update notes updated");
+                // CRUCIAL REQUIREMENT: UpdateDate must remain completely unchanged!
+                Assert(editedScreenUpdate.UpdateDate == originalScreenDate, "UpdateDate preserved intact without change");
+                Assert(editedScreenUpdate.CreatedAt == originalScreenCreatedAt, "CreatedAt preserved intact without change");
+
+                // 2. Correct latest update to 'Offer Received' and verify parent application's status auto-synchronizes
+                db.UpdateApplicationUpdate(interviewUpdate.Id, "StatusChange", "Offer Received", "Received formal written offer");
+                var reloadedAfterOffer = db.GetApplicationById(editAppId);
+                Assert(reloadedAfterOffer!.CurrentStatus == "Offer Received", "Parent application CurrentStatus automatically synchronized to 'Offer Received'");
+                Assert(interviewUpdate.UpdateDate == originalInterviewDate, "Interview update date preserved intact");
+
+                // 3. Clear status on the latest update (change to Note with null status) and verify fallback
+                db.UpdateApplicationUpdate(interviewUpdate.Id, "Note", null, "Offer was actually for another role, demoted to general note");
+                var reloadedAfterClear = db.GetApplicationById(editAppId);
+                Assert(reloadedAfterClear!.CurrentStatus == "Technical Assessment", "Parent application CurrentStatus successfully falls back to previous valid status transition ('Technical Assessment')");
+
+                // 4. Verify updated StatusHistorySummaryText reflects corrections
+                var appWithHistory = db.GetApplications(new ApplicationFilter { AuditReportMode = "StatusChangesOnly" })
+                    .First(a => a.Id == editAppId);
+                Assert(appWithHistory.StatusHistorySummaryText == "2026-09-01: Applied ➔ 2026-09-03: Technical Assessment",
+                    $"StatusHistorySummaryText should reflect corrected transitions. Got: {appWithHistory.StatusHistorySummaryText}");
+
+                Console.WriteLine("[PASS] Test 19: Audit record editing without date changes and parent status sync verified.");
+
                 Console.WriteLine();
-                Console.WriteLine("🎉 ALL 18 TEST SUITES PASSED PERFECTLY!");
+                Console.WriteLine("🎉 ALL 19 TEST SUITES PASSED PERFECTLY!");
                 return 0;
             }
             catch (Exception ex)

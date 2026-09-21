@@ -198,6 +198,40 @@ namespace JobAppTracker
             }
         }
 
+        private void BtnEditAuditItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.DataContext is ApplicationUpdate update)
+            {
+                EditAuditUpdate(update);
+            }
+        }
+
+        private void EditAuditItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.DataContext is ApplicationUpdate update)
+            {
+                EditAuditUpdate(update);
+            }
+        }
+
+        private void EditAuditUpdate(ApplicationUpdate update)
+        {
+            if (_vm.SelectedApplication == null || update == null) return;
+
+            var dlg = new Views.EditUpdateWindow(_vm.Database, _vm.SelectedApplication, update)
+            {
+                Owner = this
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                int currentId = _vm.SelectedApplication.Id;
+                _vm.ApplyFilters();
+                _vm.SelectedApplication = System.Linq.Enumerable.FirstOrDefault(_vm.Applications, a => a.Id == currentId);
+                _vm.LoadSelectedDetails();
+            }
+        }
+
         private void BtnCopyAuditItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement elem && elem.DataContext is ApplicationUpdate update)

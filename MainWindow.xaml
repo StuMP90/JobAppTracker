@@ -488,6 +488,8 @@
                                                             Padding="12" Margin="0,0,0,8">
                                                         <Border.ContextMenu>
                                                             <ContextMenu>
+                                                                <MenuItem Header="✏️ Edit Status / Notes..." Click="EditAuditItem_Click"/>
+                                                                <Separator/>
                                                                 <MenuItem Header="📋 Copy Notes Text" Click="CopyAuditNote_Click"/>
                                                                 <MenuItem Header="📋 Copy Full Entry" Click="CopyAuditEntry_Click"/>
                                                             </ContextMenu>
@@ -498,13 +500,18 @@
                                                                 <ColumnDefinition Width="*"/>
                                                             </Grid.ColumnDefinitions>
 
-                                                            <TextBlock Grid.Column="0" Text="{Binding TypeIcon}" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Top"/>
+                                                             <TextBlock Grid.Column="0" Text="{Binding TypeIcon}" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Top"/>
 
                                                             <StackPanel Grid.Column="1">
                                                                 <DockPanel>
-                                                                    <Button Content="📋" DockPanel.Dock="Right" Background="Transparent" BorderThickness="0" 
-                                                                            Cursor="Hand" ToolTip="Copy this audit entry" Margin="6,0,0,0"
-                                                                            Click="BtnCopyAuditItem_Click" VerticalAlignment="Center" Padding="2"/>
+                                                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                                                        <Button Content="✏️" Background="Transparent" BorderThickness="0" 
+                                                                                Cursor="Hand" ToolTip="Edit status or notes for this audit entry" Margin="4,0,0,0"
+                                                                                Click="BtnEditAuditItem_Click" Padding="2"/>
+                                                                        <Button Content="📋" Background="Transparent" BorderThickness="0" 
+                                                                                Cursor="Hand" ToolTip="Copy this audit entry" Margin="4,0,0,0"
+                                                                                Click="BtnCopyAuditItem_Click" Padding="2"/>
+                                                                    </StackPanel>
                                                                     <TextBlock Text="{Binding UpdateDateFormatted}" FontSize="11" Foreground="#64748B" DockPanel.Dock="Right" VerticalAlignment="Center"/>
                                                                     <TextBox Text="{Binding SummaryTitle, Mode=OneWay}" FontWeight="SemiBold" Foreground="#0F172A" 
                                                                              IsReadOnly="True" BorderThickness="0" Background="Transparent" 

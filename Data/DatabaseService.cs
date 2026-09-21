@@ -498,6 +498,112 @@ namespace JobAppTracker.Data
             tx.Commit();
         }
 
+        public void UpdateApplicationUpdate(int updateId, string updateType, string? newStatus, string notes)
+        {
+            using var conn = CreateConnection();
+            using var tx = conn.BeginTransaction();
+
+            int appId = 0;
+            using (var getCmd = conn.CreateCommand())
+            {
+                getCmd.Transaction = tx;
+                getCmd.CommandText = "SELECT ApplicationId FROM ApplicationUpdates WHERE Id = @id";
+                getCmd.Parameters.AddWithValue("@id", updateId);
+                var val = getCmd.ExecuteScalar();
+                if (val == null || val == DBNull.Value) return;
+                appId = Convert.ToInt32(val);
+            }
+
+            // Update the audit entry (UpdateDate and CreatedAt are untouched to maintain date integrity)
+            using (var updCmd = conn.CreateCommand())
+            {
+                updCmd.Transaction = tx;
+                updCmd.CommandText = @"
+                    UPDATE ApplicationUpdates SET
+                        UpdateType = @type,
+                        NewStatus = @newStatus,
+                        Notes = @notes
+                    WHERE Id = @id
+                ";
+                updCmd.Parameters.AddWithValue("@id", updateId);
+                updCmd.Parameters.AddWithValue("@type", updateType);
+                updCmd.Parameters.AddWithValue("@newStatus", (object?)newStatus ?? DBNull.Value);
+                updCmd.Parameters.AddWithValue("@notes", notes);
+                updCmd.ExecuteNonQuery();
+            }
+
+            // Sync parent application's CurrentStatus and IsFinal based on chronological sequence of updates
+            SyncApplicationStatusFromAuditTrailInternal(conn, tx, appId);
+
+            tx.Commit();
+        }
+
+        private void SyncApplicationStatusFromAuditTrailInternal(SqliteConnection conn, SqliteTransaction tx, int appId)
+        {
+            var updates = new List<(int Id, DateTime UpdateDate, string UpdateType, string? NewStatus, DateTime CreatedAt)>();
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.Transaction = tx;
+                cmd.CommandText = @"
+                    SELECT Id, UpdateDate, UpdateType, NewStatus, CreatedAt
+                    FROM ApplicationUpdates
+                    WHERE ApplicationId = @appId
+                ";
+                cmd.Parameters.AddWithValue("@appId", appId);
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    updates.Add((
+                        reader.GetInt32(0),
+                        DateTime.Parse(reader.GetString(1)),
+                        reader.GetString(2),
+                        reader.IsDBNull(3) ? null : reader.GetString(3),
+                        DateTime.Parse(reader.GetString(4))
+                    ));
+                }
+            }
+
+            if (updates.Count == 0) return;
+
+            // Sort chronologically: UpdateDate ASC, CreatedAt ASC, Id ASC
+            var sorted = System.Linq.Enumerable.ToList(
+                System.Linq.Enumerable.ThenBy(
+                    System.Linq.Enumerable.ThenBy(
+                        System.Linq.Enumerable.OrderBy(updates, u => u.UpdateDate),
+                        u => u.CreatedAt
+                    ),
+                    u => u.Id
+                )
+            );
+
+            // Find the latest update that has a status transition or was the initial creation
+            string? latestStatus = null;
+            foreach (var u in sorted)
+            {
+                if (!string.IsNullOrWhiteSpace(u.NewStatus))
+                {
+                    latestStatus = u.NewStatus;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(latestStatus))
+            {
+                bool isFinal = IsFinalStatus(latestStatus);
+                using var appCmd = conn.CreateCommand();
+                appCmd.Transaction = tx;
+                appCmd.CommandText = @"
+                    UPDATE Applications SET
+                        CurrentStatus = @status,
+                        IsFinal = @isFinal
+                    WHERE Id = @appId
+                ";
+                appCmd.Parameters.AddWithValue("@status", latestStatus);
+                appCmd.Parameters.AddWithValue("@isFinal", isFinal ? 1 : 0);
+                appCmd.Parameters.AddWithValue("@appId", appId);
+                appCmd.ExecuteNonQuery();
+            }
+        }
+
         public List<ApplicationUpdate> GetUpdates(int applicationId)
         {
             var list = new List<ApplicationUpdate>();
