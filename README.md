@@ -23,6 +23,8 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 ### 3. Comprehensive Audit Trail & History
 - **Date-Stamped Event Log**: Full reverse-chronological timeline of all events recorded against each application.
 - **Selectable & Copyable Text**: All note text, titles, and event descriptions can be highlighted and copied with mouse/keyboard (`Ctrl+C`), right-click context menus (`📋 Copy Notes Text`, `📋 Copy Full Entry`), or via 1-click `📋` copy buttons on each event card.
+- **Audit Record Editing & Status Correction**: Edit existing notes or correct mistakenly chosen status updates (`✏️ Edit Record`) directly from the timeline. Event dates remain locked to preserve chronological integrity, and editing the latest status event automatically synchronizes the parent application's status.
+- **Chronological Sequence & Deduplication**: Timelines and status histories maintain deterministic forward ordering (`UpdateDate ASC, CreatedAt ASC, Id ASC`) with automatic deduplication of consecutive identical statuses.
 - **Automated Tracking**: Logs initial submission, status transitions (`Applied ➔ 1st Interview`), file attachments, notes, and recruiter phone calls.
 - **Automatic Date Refresh**: Refreshes the application's `LastUpdatedDate` whenever any activity occurs.
 
@@ -42,6 +44,7 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 
 ### 6. Printable Reports, Dossiers & Data Export
 - **Printable HTML Reports ("Job Applications Report")**: Professional browser-based reports formatted with `@media print` styling, ready to print or save to PDF. Includes salary/rate, active sort order, date range field grounding, and summary KPI cards.
+- **Overall Totals ("X of Y" Context)**: When filtering reports (by date range, status, agency, or search query), KPI metric cards display comparative metrics in `"X of Y (Z%)"` format (e.g. `6 of 18 (33%) Active`), instantly revealing how the filtered subset compares to the overall database totals in both the interactive viewer and printable HTML export.
 - **Flexible History Reporting Modes**:
   - **None**: Standard concise table view.
   - **Status changes only (dates & statuses)**: Generates a short, clean status progression timeline (e.g. `2026-08-01: Applied ➔ 2026-08-10: 1st Interview ➔ 2026-08-20: Closed due to inactivity`) without long recruiter notes or full text details.
@@ -59,11 +62,10 @@ JobAppTracker/
 ├── Data/
 │   └── DatabaseService.cs       # SQLite database connection, migrations, and CRUD operations
 ├── Models/
-│   ├── ApplicationFilter.cs     # Multi-criteria filter and sort parameters
+│   ├── ApplicationFilter.cs     # Multi-criteria filter, sort parameters, and report metrics models
 │   ├── ApplicationUpdate.cs     # Audit trail event model
 │   ├── Attachment.cs            # File attachment metadata model
-│   ├── JobApplication.cs        # Primary job application data model
-│   └── ReportSummary.cs         # Aggregate KPI metrics model
+│   └── JobApplication.cs        # Primary job application data model
 ├── Services/
 │   ├── AttachmentService.cs     # Attachment management, file launching, and browser opening
 │   └── ExportService.cs         # HTML printable report, single-app dossier, and CSV export engine
@@ -71,12 +73,14 @@ JobAppTracker/
 │   ├── MainViewModel.cs         # WPF MVVM ViewModel for dashboard state, filtering, and commands
 │   └── RelayCommand.cs          # ICommand implementation
 ├── Views/
+│   ├── AddSourceDialog.xaml       # Dialog to add custom application sources
+│   ├── AddUpdateWindow.xaml       # Add note / status update dialog
 │   ├── ApplicationEditWindow.xaml # Create / Edit application dialog & attachment manager
+│   ├── EditUpdateWindow.xaml      # Edit audit trail event & correct status dialog
 │   ├── ReportsWindow.xaml         # Dedicated reporting, analytics & export window
-│   ├── SettingsWindow.xaml        # Preferences, staleness threshold & custom sources manager
-│   └── UpdateDialog.xaml          # Add note / status update dialog
+│   └── SettingsWindow.xaml        # Preferences, staleness threshold & custom sources manager
 ├── Converters/                  # WPF XAML value converters (staleness, visibility, dates)
-├── Tests/                       # Automated standalone verification test suite (14 test suites)
+├── Tests/                       # Automated standalone verification test suite (20 test suites)
 │   ├── JobAppTracker.Tests.csproj
 │   └── Program.cs
 ├── MainWindow.xaml              # Primary application window & interactive dashboard
@@ -115,7 +119,7 @@ JobAppTracker/
 
 ## Running the Automated Tests
 
-The solution includes a comprehensive, standalone automated test suite (17 test suites) covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, "All except closed/complete" filtering, new finalized statuses, date filtering (Created vs Last Activity), and short status changes reporting:
+The solution includes a comprehensive, standalone automated test suite (20 test suites) covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, "All except closed/complete" filtering, new finalized statuses, date filtering (Created vs Last Activity), short status changes reporting, audit record editing with parent status synchronization, chronological ordering & deduplication, and filtered overall totals ("X of Y" style):
 
 ```powershell
 dotnet run --project Tests/JobAppTracker.Tests.csproj
