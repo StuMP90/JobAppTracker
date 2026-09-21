@@ -127,6 +127,19 @@ dotnet run --project Tests/JobAppTracker.Tests.csproj
 
 ---
 
+## Building the Windows Installer
+
+To build a standalone, self-contained Windows Installer (`JobAppTrackerSetup.exe`):
+
+1. Ensure **[Inno Setup 7](https://jrsoftware.org/isinfo.php)** is installed.
+2. Run the automated build script:
+   ```powershell
+   .\build-installer.ps1
+   ```
+This script executes the test suite, publishes the self-contained 64-bit application, and compiles the installer into `dist\JobAppTrackerSetup.exe`.
+
+---
+
 ## Data Storage Locations
 
 By default, application data and attachments are stored locally on your machine in:
@@ -134,3 +147,9 @@ By default, application data and attachments are stored locally on your machine 
 - **File Attachments**: `%LOCALAPPDATA%\JobAppTracker\Attachments\{application_id}\`
 
 No external cloud services or databases are required; your job search data remains 100% private and offline on your computer.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

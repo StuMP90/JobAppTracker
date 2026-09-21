@@ -8,7 +8,8 @@
         WindowStartupLocation="CenterOwner"
         Background="#F8FAFC"
         FontFamily="Segoe UI"
-        ResizeMode="CanResizeWithGrip">
+        ResizeMode="CanResizeWithGrip"
+        Icon="/app.ico">
     <Window.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="FontSize" Value="13"/>

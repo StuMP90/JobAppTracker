@@ -9,8 +9,17 @@ namespace JobAppTracker.Tests
 {
     class Program
     {
+        [STAThread]
         static int Main(string[] args)
         {
+            if (args.Length > 0 && args[0] == "--generate-icon")
+            {
+                string targetPath = args.Length > 1 
+                    ? args[1] 
+                    : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\app.ico"));
+                return IconGenerator.Generate(targetPath);
+            }
+
             Console.WriteLine("==================================================");
             Console.WriteLine("    JobAppTracker Automated Verification Suite    ");
             Console.WriteLine("==================================================");

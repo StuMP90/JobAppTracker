@@ -41,3 +41,6 @@ Attachments/
 Export/
 Report*.html
 Report*.csv
+
+## Installer Distribution Output
+dist/

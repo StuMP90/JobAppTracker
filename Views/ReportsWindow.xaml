@@ -8,7 +8,8 @@
         Title="Job Applications Reports &amp; Analytics" Height="750" Width="1160" MinWidth="1020"
         WindowStartupLocation="CenterOwner"
         Background="#F8FAFC"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI"
+        Icon="/app.ico">
     <Window.Resources>
         <conv:HexToBrushConverter x:Key="HexToBrushConverter"/>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>

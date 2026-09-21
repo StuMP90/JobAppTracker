@@ -1,0 +1,72 @@
+name: Build and Release Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Package Windows Installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Run Automated Verification Tests
+        run: dotnet run --project Tests/JobAppTracker.Tests.csproj
+
+      - name: Publish Self-Contained Application
+        run: |
+          dotnet publish JobAppTracker.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress
+
+      - name: Compile Windows Installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+        # Note: If windows-latest installs Inno Setup 7, fallback logic handles both:
+        shell: powershell
+
+      # -------------------------------------------------------------
+      # SIGNPATH CODE SIGNING (Uncomment after SignPath approval):
+      # -------------------------------------------------------------
+      # - name: Sign with SignPath Foundation
+      #   uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+      #     organization-id: '${{ secrets.SIGNPATH_ORGANIZATION_ID }}'
+      #     project-slug: 'JobAppTracker'
+      #     signing-policy-slug: 'release-signing'
+      #     artifact-configuration-slug: 'installer'
+      #     parameters: |
+      #       description: 'JobAppTracker Release ${{ github.ref_name }}'
+      #     input-files-path: 'dist/JobAppTrackerSetup.exe'
+      #     output-files-path: 'dist/JobAppTrackerSetup.exe'
+      # -------------------------------------------------------------
+
+      - name: Create GitHub Release and Upload Installer
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: Release ${{ github.ref_name }}
+          files: dist/JobAppTrackerSetup.exe
+          draft: false
+          prerelease: false
+          generate_release_notes: true

@@ -8,7 +8,8 @@
         Title="Job Application Tracker" Height="820" Width="1360"
         WindowStartupLocation="CenterScreen"
         Background="#F1F5F9"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI"
+        Icon="app.ico">
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
         <conv:HexToBrushConverter x:Key="HexToBrushConverter"/>
