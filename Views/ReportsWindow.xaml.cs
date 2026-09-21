@@ -47,11 +47,24 @@ namespace JobAppTracker.Views
             };
             CmbSort.SelectedIndex = 0;
 
+            CmbDateType.ItemsSource = new List<string>
+            {
+                "Applied / Created Date",
+                "Last Activity Date"
+            };
+            CmbDateType.SelectedIndex = 0;
+
             _isInitialized = true;
             RefreshReport();
         }
 
         private void Filter_Changed(object sender, EventArgs e)
+        {
+            if (!_isInitialized) return;
+            RefreshReport();
+        }
+
+        private void HistoryMode_Changed(object sender, RoutedEventArgs e)
         {
             if (!_isInitialized) return;
             RefreshReport();
@@ -63,7 +76,7 @@ namespace JobAppTracker.Views
             _currentList = _db.GetApplications(filter);
             _currentSummary = _db.GetReportSummary(filter);
 
-            GridReport.RowDetailsVisibilityMode = filter.IncludeAuditTrail 
+            GridReport.RowDetailsVisibilityMode = (filter.AuditReportMode != "None")
                 ? DataGridRowDetailsVisibilityMode.Visible 
                 : DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
 
@@ -88,15 +101,32 @@ namespace JobAppTracker.Views
 
         private ApplicationFilter BuildFilter()
         {
+            string historyMode = "None";
+            if (RbHistoryStatusOnly != null && RbHistoryStatusOnly.IsChecked == true)
+            {
+                historyMode = "StatusChangesOnly";
+            }
+            else if (RbHistoryFull != null && RbHistoryFull.IsChecked == true)
+            {
+                historyMode = "Full";
+            }
+
+            string dateType = "AppliedDate";
+            if (CmbDateType?.SelectedItem?.ToString() == "Last Activity Date")
+            {
+                dateType = "LastActivity";
+            }
+
             var filter = new ApplicationFilter
             {
                 SearchText = TxtSearch.Text?.Trim(),
                 Status = CmbStatus.SelectedItem?.ToString() ?? "All",
                 Agency = CmbAgency.SelectedItem?.ToString() ?? "All",
                 Source = CmbSource.SelectedItem?.ToString() ?? "All",
+                DateFilterType = dateType,
                 FromDate = DpFromDate.SelectedDate,
                 ToDate = DpToDate.SelectedDate,
-                IncludeAuditTrail = ChkIncludeAudit != null && ChkIncludeAudit.IsChecked == true
+                AuditReportMode = historyMode
             };
 
             var sort = CmbSort.SelectedItem?.ToString();
@@ -130,9 +160,10 @@ namespace JobAppTracker.Views
             CmbAgency.SelectedIndex = 0;
             CmbSource.SelectedIndex = 0;
             CmbSort.SelectedIndex = 0;
+            if (CmbDateType != null) CmbDateType.SelectedIndex = 0;
             DpFromDate.SelectedDate = null;
             DpToDate.SelectedDate = null;
-            if (ChkIncludeAudit != null) ChkIncludeAudit.IsChecked = false;
+            if (RbHistoryNone != null) RbHistoryNone.IsChecked = true;
             RefreshReport();
         }
 
@@ -162,8 +193,11 @@ namespace JobAppTracker.Views
                 };
                 if (dlg.ShowDialog() == true)
                 {
-                    bool includeAudit = ChkIncludeAudit != null && ChkIncludeAudit.IsChecked == true;
-                    ExportService.ExportToCsv(_currentList, dlg.FileName, includeAudit);
+                    string historyMode = "None";
+                    if (RbHistoryStatusOnly != null && RbHistoryStatusOnly.IsChecked == true) historyMode = "StatusChangesOnly";
+                    else if (RbHistoryFull != null && RbHistoryFull.IsChecked == true) historyMode = "Full";
+
+                    ExportService.ExportToCsv(_currentList, dlg.FileName, historyMode);
                     MessageBox.Show($"Exported {_currentList.Count} items to:\n{dlg.FileName}", "Export Completed", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -175,6 +209,7 @@ namespace JobAppTracker.Views
 
         private void BtnCopySummary_Click(object sender, RoutedEventArgs e)
         {
+            var filter = BuildFilter();
             var sb = new StringBuilder();
             sb.AppendLine("=== Job Applications Summary Report ===");
             sb.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}");
@@ -187,14 +222,17 @@ namespace JobAppTracker.Views
             sb.AppendLine($"Rejected / Closed: {_currentSummary.RejectedCount + _currentSummary.WithdrawnCount}");
             sb.AppendLine();
             sb.AppendLine("Applications:");
-            
-            bool includeAudit = ChkIncludeAudit != null && ChkIncludeAudit.IsChecked == true;
 
             foreach (var a in _currentList)
             {
                 var salaryText = !string.IsNullOrWhiteSpace(a.SalaryOrRate) ? $" | Salary: {a.SalaryOrRate}" : "";
                 sb.AppendLine($"- [{a.AppliedDateFormatted}] {a.DisplayTitle} at {a.Company}{salaryText} | Status: {a.CurrentStatus} | Source: {a.Source} | Last Activity: {a.StalenessText}");
-                if (includeAudit && a.AuditTrail != null && a.AuditTrail.Count > 0)
+                
+                if (filter.AuditReportMode == "StatusChangesOnly")
+                {
+                    sb.AppendLine($"    • Status History: {a.StatusHistorySummaryText}");
+                }
+                else if (filter.AuditReportMode == "Full" && a.AuditTrail != null && a.AuditTrail.Count > 0)
                 {
                     foreach (var u in a.AuditTrail)
                     {

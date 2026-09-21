@@ -49,19 +49,21 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="180"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="105"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="105"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="145"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="135"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="135"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
@@ -91,26 +93,36 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="10">
+                        <TextBlock Text="Date Field" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbDateType" Height="30" SelectionChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="12">
                         <TextBlock Text="From Date" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <DatePicker x:Name="DpFromDate" Height="30" SelectedDateChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="12">
+                    <StackPanel Grid.Column="14">
                         <TextBlock Text="To Date" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <DatePicker x:Name="DpToDate" Height="30" SelectedDateChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <Button Grid.Column="14" Content="Reset" VerticalAlignment="Bottom" Height="30" Padding="12,0" 
+                    <Button Grid.Column="16" Content="Reset" VerticalAlignment="Bottom" Height="30" Padding="12,0" 
                             Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnResetFilters_Click"/>
                 </Grid>
 
                 <Border Margin="0,12,0,0" Padding="0,10,0,0" BorderBrush="#F1F5F9" BorderThickness="0,1,0,0">
-                    <DockPanel>
-                        <CheckBox x:Name="ChkIncludeAudit" Content="Include audit trail &amp; history events for listed vacancies" 
-                                  FontWeight="SemiBold" Foreground="#1E293B" VerticalAlignment="Center"
-                                  Checked="Filter_Changed" Unchecked="Filter_Changed"/>
-                        <TextBlock Text="💡 When enabled, prints and exports full update history (status changes, recruiter notes, interview logs) for each vacancy" 
-                                   Foreground="#64748B" FontSize="11" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                    <DockPanel LastChildFill="False">
+                        <TextBlock Text="History in Report:" FontWeight="SemiBold" Foreground="#1E293B" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="RbHistoryNone" Content="None" IsChecked="True" GroupName="ReportHistoryGroup"
+                                     VerticalAlignment="Center" Margin="0,0,14,0" Checked="HistoryMode_Changed"/>
+                        <RadioButton x:Name="RbHistoryStatusOnly" Content="Status changes only (dates &amp; statuses)" GroupName="ReportHistoryGroup"
+                                     VerticalAlignment="Center" Margin="0,0,14,0" Checked="HistoryMode_Changed"/>
+                        <RadioButton x:Name="RbHistoryFull" Content="Full audit trail (all events &amp; notes)" GroupName="ReportHistoryGroup"
+                                     VerticalAlignment="Center" Margin="0,0,14,0" Checked="HistoryMode_Changed"/>
+                        
+                        <TextBlock Text="💡 Choose whether to include short status changes or full audit notes in reports &amp; exports" 
+                                   Foreground="#64748B" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </DockPanel>
                 </Border>
             </StackPanel>
@@ -204,6 +216,18 @@
                         <DataTemplate>
                             <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Margin="12,4,12,10" Padding="12">
                                 <StackPanel>
+                                    <!-- Concise Status Progression Summary -->
+                                    <Border Background="#EEF2FF" BorderBrush="#C7D2FE" BorderThickness="1" CornerRadius="5" Padding="10,6" Margin="0,0,0,10">
+                                        <DockPanel>
+                                            <TextBlock Text="🔄 Status Progression:" FontWeight="Bold" FontSize="11" Foreground="#4338CA" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBox Text="{Binding StatusHistorySummaryText, Mode=OneWay}" 
+                                                     IsReadOnly="True" BorderThickness="0" Background="Transparent" 
+                                                     Foreground="#1E1B4B" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
+                                                     Cursor="IBeam" FocusVisualStyle="{x:Null}" Padding="0"/>
+                                        </DockPanel>
+                                    </Border>
+
+                                    <!-- Full Audit Trail & Events -->
                                     <DockPanel Margin="0,0,0,8">
                                         <TextBlock Text="📜 Audit Trail &amp; Events" FontWeight="Bold" FontSize="12" Foreground="#0F172A"/>
                                         <TextBlock Text="{Binding AuditTrail.Count, StringFormat='({0} recorded)'}" Foreground="#64748B" FontSize="11" Margin="6,0,0,0" VerticalAlignment="Center"/>
@@ -222,8 +246,14 @@
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Grid.Column="0" Text="{Binding UpdateDateFormatted}" Foreground="#64748B" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                         <TextBlock Grid.Column="1" Text="{Binding TypeIcon}" FontSize="12" VerticalAlignment="Center"/>
-                                                        <TextBlock Grid.Column="2" Text="{Binding SummaryTitle}" FontWeight="SemiBold" Foreground="#1E293B" FontSize="11" VerticalAlignment="Center"/>
-                                                        <TextBlock Grid.Column="3" Text="{Binding Notes}" Foreground="#475569" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                        <TextBox Grid.Column="2" Text="{Binding SummaryTitle, Mode=OneWay}" 
+                                                                 IsReadOnly="True" BorderThickness="0" Background="Transparent" 
+                                                                 FontWeight="SemiBold" Foreground="#1E293B" FontSize="11" VerticalAlignment="Center" 
+                                                                 Padding="0" Cursor="IBeam" FocusVisualStyle="{x:Null}"/>
+                                                        <TextBox Grid.Column="3" Text="{Binding Notes, Mode=OneWay}" 
+                                                                 IsReadOnly="True" BorderThickness="0" Background="Transparent" 
+                                                                 Foreground="#475569" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center" 
+                                                                 Padding="0" Cursor="IBeam" FocusVisualStyle="{x:Null}"/>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>

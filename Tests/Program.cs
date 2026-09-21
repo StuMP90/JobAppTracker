@@ -363,8 +363,191 @@ Key Requirements:
 
                 Console.WriteLine("[PASS] Test 14: 'All except closed/complete' successfully filters out closed/finalized items in queries and reports.");
 
+                // --- TEST 15: New Statuses Handling ("Closed due to inactivity", "Discussed, bad fit", "Employer changed role") ---
+                Console.WriteLine("\n--- Running Test 15: New Statuses Handling ---");
+                var distinctStatuses = db.GetDistinctStatuses();
+                Assert(distinctStatuses.Contains("Closed due to inactivity"), "Distinct statuses contains 'Closed due to inactivity'");
+                Assert(distinctStatuses.Contains("Discussed, bad fit"), "Distinct statuses contains 'Discussed, bad fit'");
+                Assert(distinctStatuses.Contains("Employer changed role"), "Distinct statuses contains 'Employer changed role'");
+                Assert(distinctStatuses.Contains("Role Cancelled / On Hold"), "Distinct statuses contains 'Role Cancelled / On Hold'");
+
+                Assert(DatabaseService.IsFinalStatus("Closed due to inactivity"), "'Closed due to inactivity' is recognized as final");
+                Assert(DatabaseService.IsFinalStatus("Discussed, bad fit"), "'Discussed, bad fit' is recognized as final");
+                Assert(DatabaseService.IsFinalStatus("Employer changed role"), "'Employer changed role' is recognized as final");
+                Assert(DatabaseService.IsFinalStatus("Role Cancelled / On Hold"), "'Role Cancelled / On Hold' is recognized as final");
+
+                // Create an application with "Closed due to inactivity"
+                var inactiveApp = new JobApplication
+                {
+                    AppliedDate = DateTime.Today.AddDays(-30),
+                    JobTitle = "DevOps Engineer",
+                    Company = "Cloud Services Ltd",
+                    Source = "LinkedIn",
+                    ApplicationMethod = "Direct",
+                    CurrentStatus = "Closed due to inactivity"
+                };
+                int inactiveId = db.SaveApplication(inactiveApp);
+                var reloadedInactive = db.GetApplicationById(inactiveId);
+                Assert(reloadedInactive != null && reloadedInactive.IsFinal, "Application with 'Closed due to inactivity' is marked IsFinal");
+                Assert(!reloadedInactive!.IsStale, "Finalized inactive application is not stale");
+
+                // Verify "All except closed/complete" excludes it
+                var openAppsAfterNew = db.GetApplications(new ApplicationFilter { Status = "All except closed/complete" });
+                Assert(!openAppsAfterNew.Any(a => a.Id == inactiveId), "'Closed due to inactivity' is excluded from 'All except closed/complete'");
+                Console.WriteLine("[PASS] Test 15: New statuses ('Closed due to inactivity', 'Discussed, bad fit', 'Employer changed role') verified as final.");
+
+                // --- TEST 16: Report Date Selection (Created / Applied Date vs Last Activity Date) ---
+                Console.WriteLine("\n--- Running Test 16: Report Date Selection ---");
+                // Application 1 was applied days ago, updated yesterday
+                var filterByAppliedDate = new ApplicationFilter
+                {
+                    DateFilterType = "AppliedDate",
+                    FromDate = DateTime.Today.AddDays(-6),
+                    ToDate = DateTime.Today.AddDays(-4)
+                };
+                var appsByApplied = db.GetApplications(filterByAppliedDate);
+                Assert(appsByApplied.Any(a => a.Id == id1), "App 1 found when filtering by AppliedDate range");
+
+                // Filtering by LastActivity in that same past range should NOT return App 1 because its last update was yesterday
+                var filterByActivityDate = new ApplicationFilter
+                {
+                    DateFilterType = "LastActivity",
+                    FromDate = DateTime.Today.AddDays(-6),
+                    ToDate = DateTime.Today.AddDays(-4)
+                };
+                var appsByActivity = db.GetApplications(filterByActivityDate);
+                Assert(!appsByActivity.Any(a => a.Id == id1), "App 1 excluded when LastActivity is outside range");
+
+                // Filtering by LastActivity for yesterday/today should return App 1
+                var filterByRecentActivity = new ApplicationFilter
+                {
+                    DateFilterType = "LastActivity",
+                    FromDate = DateTime.Today.AddDays(-2),
+                    ToDate = DateTime.Today
+                };
+                var appsByRecentActivity = db.GetApplications(filterByRecentActivity);
+                Assert(appsByRecentActivity.Any(a => a.Id == id1), "App 1 included when LastActivity is within recent range");
+                Console.WriteLine("[PASS] Test 16: Date selection by Created Date vs Last Activity Date verified.");
+
+                // --- TEST 17: Short Summary of Status Changes & Dates (without full text details) ---
+                Console.WriteLine("\n--- Running Test 17: Short Status Summary Reporting ---");
+                // Reload App 1 with audit updates
+                var app1Details = db.GetApplications(new ApplicationFilter { AuditReportMode = "StatusChangesOnly" })
+                    .First(a => a.Id == id1);
+
+                Assert(app1Details.StatusHistoryUpdates.Count >= 2, "Status history extracted status changes");
+                Assert(!string.IsNullOrWhiteSpace(app1Details.StatusHistorySummaryText), "StatusHistorySummaryText populated");
+                Assert(app1Details.StatusHistorySummaryText.Contains("1st Interview"), "Status summary text includes status change name");
+                // Ensure status summary text does NOT contain full recruiter conversation notes
+                Assert(!app1Details.StatusHistorySummaryText.Contains("Recruiter phoned: client loves the profile"), "Status summary text does not dump full update notes");
+
+                // Generate HTML report with StatusChangesOnly mode
+                var filterStatusSummary = new ApplicationFilter { AuditReportMode = "StatusChangesOnly" };
+                var statusSummaryReportPath = Path.Combine(testDir, "StatusSummary_Report.html");
+                ExportService.GenerateHtmlReport(new List<JobApplication> { app1Details }, db.GetReportSummary(), filterStatusSummary, statusSummaryReportPath);
+                Assert(File.Exists(statusSummaryReportPath), "Status summary HTML report generated");
+                var statusSummaryHtml = File.ReadAllText(statusSummaryReportPath);
+
+                Assert(statusSummaryHtml.Contains("Status Changes:"), "HTML report contains Status Changes header");
+                Assert(statusSummaryHtml.Contains("1st Interview"), "HTML report contains status change step");
+                Assert(statusSummaryHtml.Contains("Status changes &amp; dates only"), "HTML report filter banner indicates status changes & dates only");
+                // Crucial requirement: must NOT include full text details in status summary mode
+                Assert(!statusSummaryHtml.Contains("1st technical interview scheduled for Thursday 2pm"), "HTML status summary report does NOT dump full text details / notes");
+
+                // CSV Export with StatusChangesOnly
+                var csvStatusPath = Path.Combine(testDir, "StatusSummary.csv");
+                ExportService.ExportToCsv(new List<JobApplication> { app1Details }, csvStatusPath, historyMode: "StatusChangesOnly");
+                Assert(File.Exists(csvStatusPath), "Status summary CSV generated");
+                var csvStatusText = File.ReadAllText(csvStatusPath);
+                Assert(csvStatusText.Contains("StatusHistory"), "CSV contains StatusHistory column header");
+                Assert(!csvStatusText.Contains("1st technical interview scheduled for Thursday 2pm"), "CSV status summary does not include detailed notes");
+                Console.WriteLine("[PASS] Test 17: Short status changes and dates summary reporting verified.");
+
+                // --- TEST 18: Same-Day and Consecutive Status History Chronological Ordering & Deduplication ---
+                Console.WriteLine("\n--- Running Test 18: Status History Chronological Ordering & Deduplication ---");
+                var leadApp = new JobApplication
+                {
+                    AppliedDate = new DateTime(2026, 9, 6),
+                    JobTitle = "Lead PHP Developer",
+                    Company = "CodeCraft Labs",
+                    Source = "LinkedIn",
+                    CurrentStatus = "Applied"
+                };
+                int leadId = db.SaveApplication(leadApp);
+
+                // Insert raw database rows replicating legacy database data where every note had NewStatus filled
+                // and multiple events occurred on the same day (2026-09-07)
+                using (var conn = new Microsoft.Data.Sqlite.SqliteConnection(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder { DataSource = db.DatabasePath }.ToString()))
+                {
+                    conn.Open();
+                    void InsertRawUpdate(string date, string type, string? prev, string? next, string notes)
+                    {
+                        using var rawCmd = conn.CreateCommand();
+                        rawCmd.CommandText = @"
+                            INSERT INTO ApplicationUpdates (ApplicationId, UpdateDate, UpdateType, PreviousStatus, NewStatus, Notes, CreatedAt)
+                            VALUES (@appId, @date, @type, @prev, @new, @notes, @created);
+                        ";
+                        rawCmd.Parameters.AddWithValue("@appId", leadId);
+                        rawCmd.Parameters.AddWithValue("@date", date);
+                        rawCmd.Parameters.AddWithValue("@type", type);
+                        rawCmd.Parameters.AddWithValue("@prev", (object?)prev ?? DBNull.Value);
+                        rawCmd.Parameters.AddWithValue("@new", (object?)next ?? DBNull.Value);
+                        rawCmd.Parameters.AddWithValue("@notes", notes);
+                        rawCmd.Parameters.AddWithValue("@created", date + " 10:00:00");
+                        rawCmd.ExecuteNonQuery();
+                    }
+
+                    // 2026-09-07: Note in Applied
+                    InsertRawUpdate("2026-09-07", "Note", "Applied", "Applied", "Checked application status online");
+                    // 2026-09-07: Note in Applied
+                    InsertRawUpdate("2026-09-07", "Note", "Applied", "Applied", "Recruiter confirmed receipt");
+                    // 2026-09-07: Transition to Screening
+                    InsertRawUpdate("2026-09-07", "StatusChange", "Applied", "Screening", "Invited to screening call");
+                    // 2026-09-07: Note in Screening
+                    InsertRawUpdate("2026-09-07", "Note", "Screening", "Screening", "Completed screening call with recruiter");
+                    // 2026-09-07: Transition to 1st Interview
+                    InsertRawUpdate("2026-09-07", "StatusChange", "Screening", "1st Interview", "Screening passed, booked technical interview");
+                    // 2026-09-07: Note in 1st Interview
+                    InsertRawUpdate("2026-09-07", "Note", "1st Interview", "1st Interview", "Sent calendar invite");
+                    // 2026-09-09: Note in 1st Interview
+                    InsertRawUpdate("2026-09-09", "Note", "1st Interview", "1st Interview", "Attended 1st interview, waiting for feedback");
+                    // 2026-09-15: Transition to Withdrawn
+                    InsertRawUpdate("2026-09-15", "StatusChange", "1st Interview", "Withdrawn", "Accepted another offer");
+                }
+
+                var reloadedLeadApp = db.GetApplications(new ApplicationFilter { AuditReportMode = "StatusChangesOnly" })
+                    .First(a => a.Id == leadId);
+
+                var historyUpdates = reloadedLeadApp.StatusHistoryUpdates;
+                Assert(historyUpdates.Count == 4, $"Expected exactly 4 status transitions, got {historyUpdates.Count}");
+                Assert(historyUpdates[0].NewStatus == "Applied" && historyUpdates[0].UpdateDateFormatted == "2026-09-06", "Step 1: 2026-09-06 Applied");
+                Assert(historyUpdates[1].NewStatus == "Screening" && historyUpdates[1].UpdateDateFormatted == "2026-09-07", "Step 2: 2026-09-07 Screening");
+                Assert(historyUpdates[2].NewStatus == "1st Interview" && historyUpdates[2].UpdateDateFormatted == "2026-09-07", "Step 3: 2026-09-07 1st Interview");
+                Assert(historyUpdates[3].NewStatus == "Withdrawn" && historyUpdates[3].UpdateDateFormatted == "2026-09-15", "Step 4: 2026-09-15 Withdrawn");
+
+                // Check string summary format
+                Assert(reloadedLeadApp.StatusHistorySummaryText == "2026-09-06: Applied ➔ 2026-09-07: Screening ➔ 2026-09-07: 1st Interview ➔ 2026-09-15: Withdrawn",
+                    $"StatusHistorySummaryText match failed. Got: {reloadedLeadApp.StatusHistorySummaryText}");
+
+                // Check HTML report rendering
+                var leadReportPath = Path.Combine(testDir, "LeadApp_Report.html");
+                ExportService.GenerateHtmlReport(new List<JobApplication> { reloadedLeadApp }, db.GetReportSummary(), new ApplicationFilter { AuditReportMode = "StatusChangesOnly" }, leadReportPath);
+                var leadHtml = File.ReadAllText(leadReportPath);
+
+                // Verify that 1st Interview does not appear before Screening
+                int idxScreening = leadHtml.IndexOf("Screening");
+                int idxInterview = leadHtml.IndexOf("1st Interview");
+                Assert(idxScreening >= 0 && idxInterview >= 0 && idxScreening < idxInterview,
+                    "Screening must appear BEFORE 1st Interview in HTML report");
+
+                // Verify no consecutive identical badges
+                Assert(!leadHtml.Contains("1st Interview</span></span><span class=\"status-step-arrow\">&rarr;</span><span class=\"status-step-pill\"><span class=\"status-step-date\">2026-09-07</span><span class=\"status-step-name\">1st Interview"),
+                    "HTML report must not contain duplicate consecutive 1st Interview badges");
+
+                Console.WriteLine("[PASS] Test 18: Same-day ordering and consecutive deduplication verified.");
+
                 Console.WriteLine();
-                Console.WriteLine("🎉 ALL 14 TEST SUITES PASSED PERFECTLY!");
+                Console.WriteLine("🎉 ALL 18 TEST SUITES PASSED PERFECTLY!");
                 return 0;
             }
             catch (Exception ex)

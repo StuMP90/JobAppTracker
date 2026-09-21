@@ -192,11 +192,56 @@ namespace JobAppTracker.Services
                     font-style: italic;
                 }
 
+                .status-summary-box {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-left: 3px solid #6366f1;
+                    border-radius: 6px;
+                    padding: 8px 12px;
+                    font-size: 12px;
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                }
+                .status-summary-title {
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #475569;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-right: 6px;
+                }
+                .status-step-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    background: #f1f5f9;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 4px;
+                    padding: 3px 8px;
+                    font-size: 11px;
+                }
+                .status-step-date {
+                    font-weight: 600;
+                    color: #64748b;
+                    margin-right: 5px;
+                }
+                .status-step-name {
+                    font-weight: 600;
+                    color: #0f172a;
+                }
+                .status-step-arrow {
+                    color: #94a3b8;
+                    font-weight: bold;
+                    margin: 0 3px;
+                }
+
                 @media print {
                     body { background: #fff; padding: 0; }
                     .container { box-shadow: none; padding: 0; max-width: 100%; }
                     .print-btn { display: none; }
                     .audit-box { break-inside: avoid; border-color: #cbd5e1; }
+                    .status-summary-box { break-inside: avoid; border-color: #cbd5e1; }
                 }
             ");
             sb.AppendLine("</style>");
@@ -237,7 +282,23 @@ namespace JobAppTracker.Services
                 if (filter.Source != "All") filterParts.Add($"Source: {filter.Source}");
                 if (filter.Method != "All") filterParts.Add($"Method: {filter.Method}");
                 if (filter.QuickFilter != "All") filterParts.Add($"Tab: {filter.QuickFilter}");
-                if (filter.IncludeAuditTrail) filterParts.Add("Audit Trail: <strong>Included</strong>");
+
+                if (filter.FromDate.HasValue || filter.ToDate.HasValue)
+                {
+                    var dateTypeLabel = filter.DateFilterType == "LastActivity" ? "Last Activity Date" : "Applied / Created Date";
+                    var fromStr = filter.FromDate.HasValue ? filter.FromDate.Value.ToString("yyyy-MM-dd") : "any";
+                    var toStr = filter.ToDate.HasValue ? filter.ToDate.Value.ToString("yyyy-MM-dd") : "any";
+                    filterParts.Add($"Date Range ({dateTypeLabel}): <strong>{fromStr}</strong> to <strong>{toStr}</strong>");
+                }
+
+                if (filter.AuditReportMode == "StatusChangesOnly")
+                {
+                    filterParts.Add("History: <strong>Status changes &amp; dates only</strong>");
+                }
+                else if (filter.AuditReportMode == "Full" || filter.IncludeAuditTrail)
+                {
+                    filterParts.Add("Audit Trail: <strong>Included</strong> (Full History)");
+                }
 
                 sb.AppendLine("<div style=\"background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-bottom: 20px; font-size: 13px; color: #475569;\">");
                 sb.AppendLine(string.Join(" &bull; ", filterParts));
@@ -260,7 +321,8 @@ namespace JobAppTracker.Services
             sb.AppendLine("</thead>");
             sb.AppendLine("<tbody>");
 
-            bool showAudit = filter != null && filter.IncludeAuditTrail;
+            bool showFullAudit = filter != null && (filter.AuditReportMode == "Full" || filter.IncludeAuditTrail);
+            bool showStatusOnly = filter != null && filter.AuditReportMode == "StatusChangesOnly";
 
             foreach (var app in applications)
             {
@@ -327,8 +389,37 @@ namespace JobAppTracker.Services
 
                 sb.AppendLine("</tr>");
 
-                // Audit Trail sub-row if enabled
-                if (showAudit)
+                // Short status changes & dates sub-row if enabled
+                if (showStatusOnly)
+                {
+                    sb.AppendLine("<tr class=\"audit-row\">");
+                    sb.AppendLine("<td colspan=\"8\">");
+                    sb.AppendLine("<div class=\"status-summary-box\">");
+                    sb.AppendLine("<span class=\"status-summary-title\">🔄 Status Changes:</span>");
+                    
+                    var statusUpdates = app.StatusHistoryUpdates;
+                    if (statusUpdates.Count > 0)
+                    {
+                        for (int i = 0; i < statusUpdates.Count; i++)
+                        {
+                            var u = statusUpdates[i];
+                            if (i > 0) sb.Append("<span class=\"status-step-arrow\">&rarr;</span>");
+                            var statusLabel = WebUtility.HtmlEncode(u.NewStatus ?? u.SummaryTitle);
+                            sb.Append($"<span class=\"status-step-pill\"><span class=\"status-step-date\">{u.UpdateDateFormatted}</span><span class=\"status-step-name\">{statusLabel}</span></span>");
+                        }
+                        sb.AppendLine();
+                    }
+                    else
+                    {
+                        sb.AppendLine($"<span class=\"status-step-pill\"><span class=\"status-step-date\">{app.AppliedDateFormatted}</span><span class=\"status-step-name\">{WebUtility.HtmlEncode(app.CurrentStatus)}</span></span>");
+                    }
+
+                    sb.AppendLine("</div>");
+                    sb.AppendLine("</td>");
+                    sb.AppendLine("</tr>");
+                }
+                // Full Audit Trail sub-row if enabled
+                else if (showFullAudit)
                 {
                     sb.AppendLine("<tr class=\"audit-row\">");
                     sb.AppendLine("<td colspan=\"8\">");
@@ -373,6 +464,11 @@ namespace JobAppTracker.Services
 
         public static string ExportToCsv(List<JobApplication> applications, string? destinationPath = null, bool includeAuditTrail = false)
         {
+            return ExportToCsv(applications, destinationPath, includeAuditTrail ? "Full" : "None");
+        }
+
+        public static string ExportToCsv(List<JobApplication> applications, string? destinationPath, string historyMode)
+        {
             if (string.IsNullOrWhiteSpace(destinationPath))
             {
                 var tempDir = Path.Combine(Path.GetTempPath(), "JobAppTrackerReports");
@@ -380,10 +476,17 @@ namespace JobAppTracker.Services
                 destinationPath = Path.Combine(tempDir, $"JobApplications_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
             }
 
+            bool isFullAudit = historyMode == "Full";
+            bool isStatusOnly = historyMode == "StatusChangesOnly";
+
             var sb = new StringBuilder();
-            if (includeAuditTrail)
+            if (isFullAudit)
             {
                 sb.AppendLine("Id,AppliedDate,JobTitle,IsCvToAgency,Company,Agency,Source,ApplicationMethod,CurrentStatus,IsFinal,LastUpdatedDate,DaysInactive,IsStale,Salary,Location,JobUrl,AuditTrail");
+            }
+            else if (isStatusOnly)
+            {
+                sb.AppendLine("Id,AppliedDate,JobTitle,IsCvToAgency,Company,Agency,Source,ApplicationMethod,CurrentStatus,IsFinal,LastUpdatedDate,DaysInactive,IsStale,Salary,Location,JobUrl,StatusHistory");
             }
             else
             {
@@ -412,7 +515,7 @@ namespace JobAppTracker.Services
                     EscapeCsv(a.JobUrl ?? "")
                 };
 
-                if (includeAuditTrail)
+                if (isFullAudit)
                 {
                     string auditTrailText = "";
                     if (a.AuditTrail != null && a.AuditTrail.Count > 0)
@@ -427,6 +530,10 @@ namespace JobAppTracker.Services
                         auditTrailText = string.Join(" | ", eventStrings);
                     }
                     fields.Add(EscapeCsv(auditTrailText));
+                }
+                else if (isStatusOnly)
+                {
+                    fields.Add(EscapeCsv(a.StatusHistorySummaryText));
                 }
 
                 sb.AppendLine(string.Join(",", fields));

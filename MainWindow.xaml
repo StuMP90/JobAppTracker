@@ -486,6 +486,12 @@
                                                 <DataTemplate>
                                                     <Border Background="#F8FAFC" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" 
                                                             Padding="12" Margin="0,0,0,8">
+                                                        <Border.ContextMenu>
+                                                            <ContextMenu>
+                                                                <MenuItem Header="📋 Copy Notes Text" Click="CopyAuditNote_Click"/>
+                                                                <MenuItem Header="📋 Copy Full Entry" Click="CopyAuditEntry_Click"/>
+                                                            </ContextMenu>
+                                                        </Border.ContextMenu>
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="Auto"/>
@@ -496,10 +502,17 @@
 
                                                             <StackPanel Grid.Column="1">
                                                                 <DockPanel>
-                                                                    <TextBlock Text="{Binding SummaryTitle}" FontWeight="SemiBold" Foreground="#0F172A"/>
-                                                                    <TextBlock Text="{Binding UpdateDateFormatted}" FontSize="11" Foreground="#64748B" HorizontalAlignment="Right"/>
+                                                                    <Button Content="📋" DockPanel.Dock="Right" Background="Transparent" BorderThickness="0" 
+                                                                            Cursor="Hand" ToolTip="Copy this audit entry" Margin="6,0,0,0"
+                                                                            Click="BtnCopyAuditItem_Click" VerticalAlignment="Center" Padding="2"/>
+                                                                    <TextBlock Text="{Binding UpdateDateFormatted}" FontSize="11" Foreground="#64748B" DockPanel.Dock="Right" VerticalAlignment="Center"/>
+                                                                    <TextBox Text="{Binding SummaryTitle, Mode=OneWay}" FontWeight="SemiBold" Foreground="#0F172A" 
+                                                                             IsReadOnly="True" BorderThickness="0" Background="Transparent" 
+                                                                             Cursor="IBeam" FocusVisualStyle="{x:Null}" Padding="0" VerticalAlignment="Center"/>
                                                                 </DockPanel>
-                                                                <TextBlock Text="{Binding Notes}" TextWrapping="Wrap" Foreground="#334155" FontSize="12" Margin="0,4,0,0"/>
+                                                                <TextBox Text="{Binding Notes, Mode=OneWay}" TextWrapping="Wrap" Foreground="#334155" FontSize="12" 
+                                                                         Margin="0,4,0,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" 
+                                                                         Cursor="IBeam" FocusVisualStyle="{x:Null}" Padding="0"/>
                                                             </StackPanel>
                                                         </Grid>
                                                     </Border>

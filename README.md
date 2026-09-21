@@ -22,6 +22,7 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 
 ### 3. Comprehensive Audit Trail & History
 - **Date-Stamped Event Log**: Full reverse-chronological timeline of all events recorded against each application.
+- **Selectable & Copyable Text**: All note text, titles, and event descriptions can be highlighted and copied with mouse/keyboard (`Ctrl+C`), right-click context menus (`📋 Copy Notes Text`, `📋 Copy Full Entry`), or via 1-click `📋` copy buttons on each event card.
 - **Automated Tracking**: Logs initial submission, status transitions (`Applied ➔ 1st Interview`), file attachments, notes, and recruiter phone calls.
 - **Automatic Date Refresh**: Refreshes the application's `LastUpdatedDate` whenever any activity occurs.
 
@@ -29,18 +30,24 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 - **Configurable Inactivity Threshold**: Defaults to 14 days without updates or response.
 - **Visual Alert Badges**: Amber alert pills (`⚠️ Stale (X d inactive)`) and relative age indicators (`Updated today`, `Updated yesterday`, `X d ago`).
 - **Quick Filters**: Dedicated **"⚠️ Stale"** filter button on the main dashboard to immediately isolate dormant applications needing follow-up.
-- **Finalized Applications**: Selecting final outcomes (`Accepted`, `Rejected`, `Closed`, `Withdrawn`) halts staleness tracking.
+- **Finalized Applications**: Selecting final outcomes (`Accepted`, `Rejected`, `Closed`, `Closed due to inactivity`, `Discussed, bad fit`, `Employer changed role`, `Withdrawn`) halts staleness tracking.
 
 ### 5. Multi-Criteria Filtering & Sort Sequencing
 - **Flexible Sorting**: Sort by **Last Activity Date** or **Created / Application Date** (both Ascending and Descending).
+- **Report Date Range Selection**: Choose whether date range filtering is based on **Applied / Created Date** or **Last Activity Date**.
 - **Agency Filter**: Dedicated agency dropdown to isolate multiple positions or CV submissions handled by the same agency (e.g. *Hays*, *Michael Page*).
+- **Expanded Status Options**: Comprehensive status list including `"Closed due to inactivity"`, `"Discussed, bad fit"`, `"Employer changed role"`, and `"Role Cancelled / On Hold"`.
 - **Dynamic Source Management**: Add custom sources (e.g. *Otta*, *Cord*, *AngelList*) on the fly, with auto-persistence to SQLite and full management in Settings.
 - **"All except closed/complete" Filter**: Quick selection in both the dashboard and reports to filter out closed, withdrawn, or rejected applications, displaying only active pursuits.
 
 ### 6. Printable Reports, Dossiers & Data Export
-- **Printable HTML Reports ("Job Applications Report")**: Professional browser-based reports formatted with `@media print` styling, ready to print or save to PDF. Includes salary/rate, active sort order, summary KPI cards, and an option to include full audit trails.
+- **Printable HTML Reports ("Job Applications Report")**: Professional browser-based reports formatted with `@media print` styling, ready to print or save to PDF. Includes salary/rate, active sort order, date range field grounding, and summary KPI cards.
+- **Flexible History Reporting Modes**:
+  - **None**: Standard concise table view.
+  - **Status changes only (dates & statuses)**: Generates a short, clean status progression timeline (e.g. `2026-08-01: Applied ➔ 2026-08-10: 1st Interview ➔ 2026-08-20: Closed due to inactivity`) without long recruiter notes or full text details.
+  - **Full audit trail**: Complete event history with all recruiter notes, interview logs, and details.
 - **Single Application Detailed Report / Dossier**: Generate a full dossier for a single vacancy including full job spec, complete chronological history timeline, and a metadata list of attached documents (without exposing file binaries).
-- **CSV Export**: Export all records or filtered views to CSV for Microsoft Excel and Google Sheets.
+- **CSV Export**: Export all records or filtered views to CSV for Microsoft Excel and Google Sheets, supporting both full audit notes or concise status change history.
 - **Summary Clipboard Export**: Copy formatted markdown/text summaries directly to the clipboard.
 
 ---
@@ -108,7 +115,7 @@ JobAppTracker/
 
 ## Running the Automated Tests
 
-The solution includes a comprehensive, standalone automated test suite covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, and the "All except closed/complete" filter:
+The solution includes a comprehensive, standalone automated test suite (17 test suites) covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, "All except closed/complete" filtering, new finalized statuses, date filtering (Created vs Last Activity), and short status changes reporting:
 
 ```powershell
 dotnet run --project Tests/JobAppTracker.Tests.csproj

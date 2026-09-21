@@ -197,5 +197,53 @@ namespace JobAppTracker
                 _vm.LoadFilterOptions();
             }
         }
+
+        private void BtnCopyAuditItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.DataContext is ApplicationUpdate update)
+            {
+                CopyAuditUpdate(update, copyFull: true);
+            }
+        }
+
+        private void CopyAuditNote_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.DataContext is ApplicationUpdate update)
+            {
+                CopyAuditUpdate(update, copyFull: false);
+            }
+        }
+
+        private void CopyAuditEntry_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.DataContext is ApplicationUpdate update)
+            {
+                CopyAuditUpdate(update, copyFull: true);
+            }
+        }
+
+        private void CopyAuditUpdate(ApplicationUpdate update, bool copyFull)
+        {
+            if (update == null) return;
+            string textToCopy;
+            if (copyFull)
+            {
+                var notesPart = !string.IsNullOrWhiteSpace(update.Notes) ? $"\nNotes: {update.Notes}" : "";
+                textToCopy = $"[{update.UpdateDateFormatted}] {update.SummaryTitle}{notesPart}";
+            }
+            else
+            {
+                textToCopy = !string.IsNullOrWhiteSpace(update.Notes) ? update.Notes : update.SummaryTitle;
+            }
+
+            try
+            {
+                Clipboard.SetText(textToCopy);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not copy to clipboard: {ex.Message}", "Clipboard Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
     }
 }

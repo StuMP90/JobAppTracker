@@ -161,7 +161,9 @@ namespace JobAppTracker.Data
                     if (filter.Status.Equals("All except closed/complete", StringComparison.OrdinalIgnoreCase) ||
                         filter.Status.Equals("All except closed", StringComparison.OrdinalIgnoreCase))
                     {
-                        sb.Append(" AND a.IsFinal = 0 AND a.CurrentStatus NOT IN ('Accepted', 'Rejected', 'Withdrawn', 'Closed')");
+                        sb.Append(@" AND a.IsFinal = 0 AND a.CurrentStatus NOT IN (
+                            'Accepted', 'Rejected', 'Withdrawn', 'Closed', 
+                            'Closed due to inactivity', 'Discussed, bad fit', 'Employer changed role', 'Role Cancelled / On Hold')");
                     }
                     else
                     {
@@ -194,15 +196,19 @@ namespace JobAppTracker.Data
                     cmd.Parameters.AddWithValue("@agency", filter.Agency.Trim());
                 }
 
+                string dateCol = (filter.DateFilterType == "LastActivity" || filter.DateFilterType == "LastUpdatedDate")
+                    ? "a.LastUpdatedDate"
+                    : "a.AppliedDate";
+
                 if (filter.FromDate.HasValue)
                 {
-                    sb.Append(" AND a.AppliedDate >= @fromDate");
+                    sb.Append($" AND {dateCol} >= @fromDate");
                     cmd.Parameters.AddWithValue("@fromDate", filter.FromDate.Value.ToString("yyyy-MM-dd"));
                 }
 
                 if (filter.ToDate.HasValue)
                 {
-                    sb.Append(" AND a.AppliedDate <= @toDate");
+                    sb.Append($" AND {dateCol} <= @toDate");
                     cmd.Parameters.AddWithValue("@toDate", filter.ToDate.Value.ToString("yyyy-MM-dd"));
                 }
 
@@ -248,7 +254,7 @@ namespace JobAppTracker.Data
                 results.Add(MapJobApplication(reader));
             }
 
-            if (filter != null && filter.IncludeAuditTrail && results.Count > 0)
+            if (filter != null && (filter.IncludeAuditTrail || filter.AuditReportMode != "None") && results.Count > 0)
             {
                 var updatesMap = GetUpdatesForApplications(results.Select(r => r.Id));
                 foreach (var app in results)
@@ -433,6 +439,11 @@ namespace JobAppTracker.Data
             if (statusChanged)
             {
                 updateType = "StatusChange";
+            }
+            else if (!string.Equals(updateType, "Created", StringComparison.OrdinalIgnoreCase))
+            {
+                prevStatus = null;
+                newStatus = null;
             }
 
             using (var insCmd = conn.CreateCommand())
@@ -731,7 +742,11 @@ namespace JobAppTracker.Data
                 else if (app.CurrentStatus.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
                     summary.RejectedCount++;
                 else if (app.CurrentStatus.Equals("Withdrawn", StringComparison.OrdinalIgnoreCase) || 
-                         app.CurrentStatus.Equals("Closed", StringComparison.OrdinalIgnoreCase))
+                         app.CurrentStatus.Equals("Closed", StringComparison.OrdinalIgnoreCase) ||
+                         app.CurrentStatus.Equals("Closed due to inactivity", StringComparison.OrdinalIgnoreCase) ||
+                         app.CurrentStatus.Equals("Discussed, bad fit", StringComparison.OrdinalIgnoreCase) ||
+                         app.CurrentStatus.Equals("Employer changed role", StringComparison.OrdinalIgnoreCase) ||
+                         app.CurrentStatus.Equals("Role Cancelled / On Hold", StringComparison.OrdinalIgnoreCase))
                     summary.WithdrawnCount++;
             }
 
@@ -893,7 +908,7 @@ namespace JobAppTracker.Data
 
         public List<string> GetDistinctStatuses()
         {
-            return new List<string>
+            var list = new List<string>
             {
                 "Applied",
                 "CV Sent",
@@ -905,15 +920,40 @@ namespace JobAppTracker.Data
                 "Accepted",
                 "Rejected",
                 "Withdrawn",
-                "Closed"
+                "Closed",
+                "Closed due to inactivity",
+                "Discussed, bad fit",
+                "Employer changed role",
+                "Role Cancelled / On Hold"
             };
+
+            try
+            {
+                using var conn = CreateConnection();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT DISTINCT CurrentStatus FROM Applications WHERE CurrentStatus IS NOT NULL AND CurrentStatus <> ''";
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var s = reader.GetString(0);
+                    if (!list.Contains(s, StringComparer.OrdinalIgnoreCase))
+                    {
+                        list.Add(s);
+                    }
+                }
+            }
+            catch { }
+
+            return list;
         }
 
         public static bool IsFinalStatus(string status)
         {
             return status switch
             {
-                "Accepted" or "Rejected" or "Withdrawn" or "Closed" => true,
+                "Accepted" or "Rejected" or "Withdrawn" or "Closed" 
+                or "Closed due to inactivity" or "Discussed, bad fit" or "Employer changed role" 
+                or "Role Cancelled / On Hold" => true,
                 _ => false
             };
         }

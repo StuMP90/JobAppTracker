@@ -11,11 +11,17 @@ namespace JobAppTracker.Models
         public string QuickFilter { get; set; } = "All"; // All, Active, Stale, Final, Interviews
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public string DateFilterType { get; set; } = "AppliedDate"; // "AppliedDate" (Created/Applied) or "LastActivity"
         public string? Company { get; set; }
         public string? Agency { get; set; }
         public string SortBy { get; set; } = "LastActivity"; // "LastActivity" or "AppliedDate"
         public bool SortDescending { get; set; } = true;
-        public bool IncludeAuditTrail { get; set; } = false;
+        public string AuditReportMode { get; set; } = "None"; // "None", "StatusChangesOnly", "Full"
+        public bool IncludeAuditTrail 
+        { 
+            get => AuditReportMode == "Full"; 
+            set => AuditReportMode = value ? "Full" : (AuditReportMode == "Full" ? "None" : AuditReportMode); 
+        }
     }
 
     public class ReportSummary
