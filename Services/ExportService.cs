@@ -14,7 +14,8 @@ namespace JobAppTracker.Services
             List<JobApplication> applications, 
             ReportSummary summary, 
             ApplicationFilter? filter,
-            string? destinationPath = null)
+            string? destinationPath = null,
+            ReportSummary? overallSummary = null)
         {
             if (string.IsNullOrWhiteSpace(destinationPath))
             {
@@ -92,7 +93,10 @@ namespace JobAppTracker.Services
                 .kpi-card.stale { border-left-color: #ea580c; background: #fff7ed; }
                 .kpi-card.interview { border-left-color: #d97706; }
                 .kpi-card.accepted { border-left-color: #16a34a; background: #f0fdf4; }
-                .kpi-val { font-size: 24px; font-weight: 700; color: #0f172a; }
+                .kpi-val { font-size: 24px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+                .kpi-card.stale .kpi-val { color: #c2410c; }
+                .kpi-total-sub { font-size: 13px; font-weight: 500; color: #64748b; margin-left: 3px; }
+                .kpi-card.stale .kpi-total-sub { color: #ea580c; opacity: 0.85; }
                 .kpi-label { font-size: 12px; color: #64748b; text-transform: uppercase; margin-top: 4px; }
                 
                 table {
@@ -249,23 +253,60 @@ namespace JobAppTracker.Services
             sb.AppendLine("<body>");
             sb.AppendLine("<div class=\"container\">");
             
+            bool isFiltered = overallSummary != null && (
+                overallSummary.TotalApplications != summary.TotalApplications ||
+                (filter != null && (
+                    !string.IsNullOrWhiteSpace(filter.SearchText) ||
+                    (filter.Status != "All" && !string.IsNullOrWhiteSpace(filter.Status)) ||
+                    (filter.Agency != "All" && !string.IsNullOrWhiteSpace(filter.Agency)) ||
+                    (filter.Source != "All" && !string.IsNullOrWhiteSpace(filter.Source)) ||
+                    (filter.Method != "All" && !string.IsNullOrWhiteSpace(filter.Method)) ||
+                    (filter.QuickFilter != "All" && !string.IsNullOrWhiteSpace(filter.QuickFilter)) ||
+                    filter.FromDate.HasValue ||
+                    filter.ToDate.HasValue
+                ))
+            );
+
+            string FormatKpi(int currentVal, int? overallVal)
+            {
+                if (isFiltered && overallVal.HasValue)
+                {
+                    return $"{currentVal} <span class=\"kpi-total-sub\">of {overallVal.Value}</span>";
+                }
+                return currentVal.ToString();
+            }
+
             // Header
             sb.AppendLine("<div class=\"header\">");
             sb.AppendLine("<div>");
             sb.AppendLine("<h1>📋 Job Applications Report</h1>");
-            sb.AppendLine($"<div class=\"meta\">Generated: {DateTime.Now:dddd, MMMM d, yyyy h:mm tt} &bull; Total entries: {applications.Count}</div>");
+            if (isFiltered && overallSummary != null)
+            {
+                sb.AppendLine($"<div class=\"meta\">Generated: {DateTime.Now:dddd, MMMM d, yyyy h:mm tt} &bull; Showing <strong>{applications.Count} of {overallSummary.TotalApplications}</strong> total applications</div>");
+            }
+            else
+            {
+                sb.AppendLine($"<div class=\"meta\">Generated: {DateTime.Now:dddd, MMMM d, yyyy h:mm tt} &bull; Total entries: {applications.Count}</div>");
+            }
             sb.AppendLine("</div>");
             sb.AppendLine("<button class=\"print-btn\" onclick=\"window.print()\">🖨️ Print / Save as PDF</button>");
             sb.AppendLine("</div>");
 
+            var totalValStr = FormatKpi(summary.TotalApplications, overallSummary?.TotalApplications);
+            var activeValStr = FormatKpi(summary.ActiveApplications, overallSummary?.ActiveApplications);
+            var staleValStr = FormatKpi(summary.StaleApplications, overallSummary?.StaleApplications);
+            var interviewValStr = FormatKpi(summary.InterviewCount, overallSummary?.InterviewCount);
+            var offersValStr = FormatKpi(summary.OfferCount + summary.AcceptedCount, overallSummary != null ? overallSummary.OfferCount + overallSummary.AcceptedCount : null);
+            var rejectedValStr = FormatKpi(summary.RejectedCount + summary.WithdrawnCount, overallSummary != null ? overallSummary.RejectedCount + overallSummary.WithdrawnCount : null);
+
             // Summary KPIs
             sb.AppendLine("<div class=\"kpi-grid\">");
-            sb.AppendLine($"<div class=\"kpi-card\"><div class=\"kpi-val\">{summary.TotalApplications}</div><div class=\"kpi-label\">Total Tracked</div></div>");
-            sb.AppendLine($"<div class=\"kpi-card active\"><div class=\"kpi-val\">{summary.ActiveApplications}</div><div class=\"kpi-label\">Active / In-Progress</div></div>");
-            sb.AppendLine($"<div class=\"kpi-card stale\"><div class=\"kpi-val\">{summary.StaleApplications}</div><div class=\"kpi-label\">⚠️ Stale (14d+)</div></div>");
-            sb.AppendLine($"<div class=\"kpi-card interview\"><div class=\"kpi-val\">{summary.InterviewCount}</div><div class=\"kpi-label\">Interviews</div></div>");
-            sb.AppendLine($"<div class=\"kpi-card accepted\"><div class=\"kpi-val\">{summary.AcceptedCount}</div><div class=\"kpi-label\">Offers / Accepted</div></div>");
-            sb.AppendLine($"<div class=\"kpi-card\"><div class=\"kpi-val\">{summary.RejectedCount}</div><div class=\"kpi-label\">Rejected / Closed</div></div>");
+            sb.AppendLine($"<div class=\"kpi-card\"><div class=\"kpi-val\">{totalValStr}</div><div class=\"kpi-label\">Total Tracked</div></div>");
+            sb.AppendLine($"<div class=\"kpi-card active\"><div class=\"kpi-val\">{activeValStr}</div><div class=\"kpi-label\">Active / In-Progress</div></div>");
+            sb.AppendLine($"<div class=\"kpi-card stale\"><div class=\"kpi-val\">{staleValStr}</div><div class=\"kpi-label\">⚠️ Stale (14d+)</div></div>");
+            sb.AppendLine($"<div class=\"kpi-card interview\"><div class=\"kpi-val\">{interviewValStr}</div><div class=\"kpi-label\">Interviews</div></div>");
+            sb.AppendLine($"<div class=\"kpi-card accepted\"><div class=\"kpi-val\">{offersValStr}</div><div class=\"kpi-label\">Offers / Accepted</div></div>");
+            sb.AppendLine($"<div class=\"kpi-card\"><div class=\"kpi-val\">{rejectedValStr}</div><div class=\"kpi-label\">Rejected / Closed</div></div>");
             sb.AppendLine("</div>");
 
             // Filter & Sequencing details banner

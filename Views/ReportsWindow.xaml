@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:conv="clr-namespace:JobAppTracker.Converters"
         mc:Ignorable="d"
-        Title="Job Applications Reports &amp; Analytics" Height="750" Width="1050"
+        Title="Job Applications Reports &amp; Analytics" Height="750" Width="1160" MinWidth="1020"
         WindowStartupLocation="CenterOwner"
         Background="#F8FAFC"
         FontFamily="Segoe UI">
@@ -19,7 +19,7 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="24">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -48,21 +48,21 @@
             <StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="135"/>
+                        <ColumnDefinition Width="1.5*" MinWidth="130"/>
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="95"/>
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="135"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="105"/>
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
@@ -151,35 +151,35 @@
 
                 <Border Grid.Column="0" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock x:Name="TxtTotalCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TxtTotalCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Center"/>
                         <TextBlock Text="TOTAL MATCHING" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="2" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock x:Name="TxtActiveCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TxtActiveCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="#2563EB" HorizontalAlignment="Center"/>
                         <TextBlock Text="ACTIVE / IN-PROGRESS" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="4" Background="#FFF7ED" CornerRadius="6" BorderBrush="#FDBA74" BorderThickness="1" Padding="12">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock x:Name="TxtStaleCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#EA580C" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TxtStaleCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="#EA580C" HorizontalAlignment="Center"/>
                         <TextBlock Text="⚠️ STALE (14D+ INACTIVE)" FontSize="10" FontWeight="SemiBold" Foreground="#EA580C" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="6" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock x:Name="TxtInterviewCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#D97706" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TxtInterviewCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="#D97706" HorizontalAlignment="Center"/>
                         <TextBlock Text="INTERVIEWS / OFFERS" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="8" Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="12">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock x:Name="TxtFinalCount" Text="0" FontSize="22" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TxtFinalCount" Text="0" FontSize="20" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center"/>
                         <TextBlock Text="ACCEPTED / CLOSED" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>

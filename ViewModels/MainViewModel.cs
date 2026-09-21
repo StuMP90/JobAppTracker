@@ -286,7 +286,8 @@ namespace JobAppTracker.ViewModels
                 {
                     var filter = GetCurrentFilter();
                     var list = _db.GetApplications(filter, StaleDaysThreshold);
-                    var reportPath = ExportService.GenerateHtmlReport(list, Summary, filter);
+                    var overallSummary = _db.GetReportSummary(null, StaleDaysThreshold);
+                    var reportPath = ExportService.GenerateHtmlReport(list, Summary, filter, overallSummary: overallSummary);
                     ExportService.OpenInBrowser(reportPath);
                 }
                 catch (Exception ex)

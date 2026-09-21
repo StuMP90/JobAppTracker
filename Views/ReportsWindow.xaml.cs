@@ -15,6 +15,7 @@ namespace JobAppTracker.Views
         private readonly DatabaseService _db;
         private List<JobApplication> _currentList = new();
         private ReportSummary _currentSummary = new();
+        private ReportSummary _overallSummary = new();
         private bool _isInitialized = false;
 
         public ReportsWindow(DatabaseService db)
@@ -47,12 +48,15 @@ namespace JobAppTracker.Views
             };
             CmbSort.SelectedIndex = 0;
 
-            CmbDateType.ItemsSource = new List<string>
+            if (CmbDateType != null)
             {
-                "Applied / Created Date",
-                "Last Activity Date"
-            };
-            CmbDateType.SelectedIndex = 0;
+                CmbDateType.ItemsSource = new List<string>
+                {
+                    "Applied / Created Date",
+                    "Last Activity Date"
+                };
+                CmbDateType.SelectedIndex = 0;
+            }
 
             _isInitialized = true;
             RefreshReport();
@@ -75,6 +79,7 @@ namespace JobAppTracker.Views
             var filter = BuildFilter();
             _currentList = _db.GetApplications(filter);
             _currentSummary = _db.GetReportSummary(filter);
+            _overallSummary = _db.GetReportSummary();
 
             GridReport.RowDetailsVisibilityMode = (filter.AuditReportMode != "None")
                 ? DataGridRowDetailsVisibilityMode.Visible 
@@ -82,13 +87,33 @@ namespace JobAppTracker.Views
 
             GridReport.ItemsSource = _currentList;
 
-            TxtTotalCount.Text = _currentSummary.TotalApplications.ToString();
-            TxtActiveCount.Text = _currentSummary.ActiveApplications.ToString();
-            TxtStaleCount.Text = _currentSummary.StaleApplications.ToString();
-            TxtInterviewCount.Text = (_currentSummary.InterviewCount + _currentSummary.OfferCount).ToString();
-            TxtFinalCount.Text = (_currentSummary.AcceptedCount + _currentSummary.RejectedCount + _currentSummary.WithdrawnCount).ToString();
+            bool isFiltered = (filter.FromDate.HasValue || filter.ToDate.HasValue ||
+                               !string.IsNullOrWhiteSpace(filter.SearchText) ||
+                               (filter.Status != "All" && !string.IsNullOrWhiteSpace(filter.Status)) ||
+                               (filter.Agency != "All" && !string.IsNullOrWhiteSpace(filter.Agency)) ||
+                               (filter.Source != "All" && !string.IsNullOrWhiteSpace(filter.Source)) ||
+                               _currentSummary.TotalApplications != _overallSummary.TotalApplications);
 
-            TxtFooterStatus.Text = $"Showing {_currentList.Count} application(s) matching current criteria";
+            if (isFiltered)
+            {
+                TxtTotalCount.Text = $"{_currentSummary.TotalApplications} of {_overallSummary.TotalApplications}";
+                TxtActiveCount.Text = $"{_currentSummary.ActiveApplications} of {_overallSummary.ActiveApplications}";
+                TxtStaleCount.Text = $"{_currentSummary.StaleApplications} of {_overallSummary.StaleApplications}";
+                TxtInterviewCount.Text = $"{_currentSummary.InterviewCount + _currentSummary.OfferCount} of {_overallSummary.InterviewCount + _overallSummary.OfferCount}";
+                TxtFinalCount.Text = $"{_currentSummary.AcceptedCount + _currentSummary.RejectedCount + _currentSummary.WithdrawnCount} of {_overallSummary.AcceptedCount + _overallSummary.RejectedCount + _overallSummary.WithdrawnCount}";
+
+                TxtFooterStatus.Text = $"Showing {_currentList.Count} of {_overallSummary.TotalApplications} application(s) matching current criteria";
+            }
+            else
+            {
+                TxtTotalCount.Text = _currentSummary.TotalApplications.ToString();
+                TxtActiveCount.Text = _currentSummary.ActiveApplications.ToString();
+                TxtStaleCount.Text = _currentSummary.StaleApplications.ToString();
+                TxtInterviewCount.Text = (_currentSummary.InterviewCount + _currentSummary.OfferCount).ToString();
+                TxtFinalCount.Text = (_currentSummary.AcceptedCount + _currentSummary.RejectedCount + _currentSummary.WithdrawnCount).ToString();
+
+                TxtFooterStatus.Text = $"Showing {_currentList.Count} application(s)";
+            }
         }
 
         private void GridReport_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -172,7 +197,7 @@ namespace JobAppTracker.Views
             try
             {
                 var filter = BuildFilter();
-                var path = ExportService.GenerateHtmlReport(_currentList, _currentSummary, filter);
+                var path = ExportService.GenerateHtmlReport(_currentList, _currentSummary, filter, overallSummary: _overallSummary);
                 ExportService.OpenInBrowser(path);
             }
             catch (Exception ex)
@@ -213,13 +238,32 @@ namespace JobAppTracker.Views
             var sb = new StringBuilder();
             sb.AppendLine("=== Job Applications Summary Report ===");
             sb.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}");
-            sb.AppendLine($"Total Tracked: {_currentSummary.TotalApplications}");
-            sb.AppendLine($"Active / In-Progress: {_currentSummary.ActiveApplications}");
-            sb.AppendLine($"Stale (14d+ inactive): {_currentSummary.StaleApplications}");
-            sb.AppendLine($"Interviews: {_currentSummary.InterviewCount}");
-            sb.AppendLine($"Offers: {_currentSummary.OfferCount}");
-            sb.AppendLine($"Accepted: {_currentSummary.AcceptedCount}");
-            sb.AppendLine($"Rejected / Closed: {_currentSummary.RejectedCount + _currentSummary.WithdrawnCount}");
+
+            bool isFiltered = (filter.FromDate.HasValue || filter.ToDate.HasValue ||
+                               !string.IsNullOrWhiteSpace(filter.SearchText) ||
+                               (filter.Status != "All" && !string.IsNullOrWhiteSpace(filter.Status)) ||
+                               (filter.Agency != "All" && !string.IsNullOrWhiteSpace(filter.Agency)) ||
+                               (filter.Source != "All" && !string.IsNullOrWhiteSpace(filter.Source)) ||
+                               _currentSummary.TotalApplications != _overallSummary.TotalApplications);
+
+            if (isFiltered)
+            {
+                sb.AppendLine($"Total Tracked: {_currentSummary.TotalApplications} of {_overallSummary.TotalApplications} overall");
+                sb.AppendLine($"Active / In-Progress: {_currentSummary.ActiveApplications} of {_overallSummary.ActiveApplications} overall");
+                sb.AppendLine($"Stale (14d+ inactive): {_currentSummary.StaleApplications} of {_overallSummary.StaleApplications} overall");
+                sb.AppendLine($"Interviews / Offers: {_currentSummary.InterviewCount + _currentSummary.OfferCount} of {_overallSummary.InterviewCount + _overallSummary.OfferCount} overall");
+                sb.AppendLine($"Accepted / Closed: {_currentSummary.AcceptedCount + _currentSummary.RejectedCount + _currentSummary.WithdrawnCount} of {_overallSummary.AcceptedCount + _overallSummary.RejectedCount + _overallSummary.WithdrawnCount} overall");
+            }
+            else
+            {
+                sb.AppendLine($"Total Tracked: {_currentSummary.TotalApplications}");
+                sb.AppendLine($"Active / In-Progress: {_currentSummary.ActiveApplications}");
+                sb.AppendLine($"Stale (14d+ inactive): {_currentSummary.StaleApplications}");
+                sb.AppendLine($"Interviews: {_currentSummary.InterviewCount}");
+                sb.AppendLine($"Offers: {_currentSummary.OfferCount}");
+                sb.AppendLine($"Accepted: {_currentSummary.AcceptedCount}");
+                sb.AppendLine($"Rejected / Closed: {_currentSummary.RejectedCount + _currentSummary.WithdrawnCount}");
+            }
             sb.AppendLine();
             sb.AppendLine("Applications:");
 

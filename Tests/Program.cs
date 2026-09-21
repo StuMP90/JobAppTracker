@@ -602,8 +602,56 @@ Key Requirements:
 
                 Console.WriteLine("[PASS] Test 19: Audit record editing without date changes and parent status sync verified.");
 
+                // --- TEST 20: Filtered Report Overall Totals in "X of Y" Style ---
+                Console.WriteLine("\n--- Running Test 20: Overall Totals in 'X of Y' Style on Filtered Reports ---");
+                // The database currently has multiple applications created in earlier tests (id1, id2, id3, leadApp, editApp).
+                var allOverallSummary = db.GetReportSummary();
+                int overallTotalCount = allOverallSummary.TotalApplications;
+                Assert(overallTotalCount >= 5, $"Overall database has at least 5 applications (got {overallTotalCount})");
+
+                // Create a date-filtered subset (only applications applied in September 2026)
+                var dateFilter = new ApplicationFilter
+                {
+                    DateFilterType = "AppliedDate",
+                    FromDate = new DateTime(2026, 9, 1),
+                    ToDate = new DateTime(2026, 9, 6)
+                };
+                var dateFilteredApps = db.GetApplications(dateFilter);
+                var dateFilteredSummary = db.GetReportSummary(dateFilter);
+
+                Assert(dateFilteredApps.Count > 0 && dateFilteredApps.Count < overallTotalCount,
+                    $"Date filtered subset has {dateFilteredApps.Count} applications (strictly less than {overallTotalCount} overall)");
+
+                var filteredReportPath = Path.Combine(testDir, "Filtered_XofY_Report.html");
+                ExportService.GenerateHtmlReport(dateFilteredApps, dateFilteredSummary, dateFilter, filteredReportPath, overallSummary: allOverallSummary);
+                Assert(File.Exists(filteredReportPath), "Filtered HTML report generated");
+
+                var filteredHtml = File.ReadAllText(filteredReportPath);
+
+                // 1. Check header meta line contains "Showing X of Y total applications"
+                Assert(filteredHtml.Contains($"Showing <strong>{dateFilteredApps.Count} of {overallTotalCount}</strong> total applications"),
+                    "HTML header displays 'Showing X of Y total applications'");
+
+                // 2. Check KPI cards contain "X of Y" style with .kpi-total-sub
+                Assert(filteredHtml.Contains($"<span class=\"kpi-total-sub\">of {overallTotalCount}</span>"),
+                    "Total Tracked KPI card displays 'X of Y' with .kpi-total-sub");
+
+                Assert(filteredHtml.Contains($"<span class=\"kpi-total-sub\">of {allOverallSummary.ActiveApplications}</span>"),
+                    "Active / In-Progress KPI card displays 'X of Y' with overall active count");
+
+                // 3. Check that an UNFILTERED report does NOT show "of Y"
+                var unfilteredReportPath = Path.Combine(testDir, "Unfiltered_Report.html");
+                var allApps = db.GetApplications();
+                ExportService.GenerateHtmlReport(allApps, allOverallSummary, null, unfilteredReportPath, overallSummary: allOverallSummary);
+                var unfilteredHtml = File.ReadAllText(unfilteredReportPath);
+
+                Assert(!unfilteredHtml.Contains("<span class=\"kpi-total-sub\">"), "Unfiltered HTML report does NOT display redundant 'of Y' subtext");
+                Assert(unfilteredHtml.Contains($"Total entries: {overallTotalCount}"), "Unfiltered HTML report displays standard 'Total entries: Y'");
+
+                Console.WriteLine("[PASS] Test 20: Overall totals in 'X of Y' style on filtered reports verified.");
+
                 Console.WriteLine();
-                Console.WriteLine("🎉 ALL 19 TEST SUITES PASSED PERFECTLY!");
+                Console.WriteLine("🎉 ALL 20 TEST SUITES PASSED PERFECTLY!");
                 return 0;
             }
             catch (Exception ex)
