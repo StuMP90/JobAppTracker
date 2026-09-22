@@ -18,6 +18,12 @@ namespace JobAppTracker
             InitializeComponent();
             _vm = new MainViewModel();
             DataContext = _vm;
+            Loaded += MainWindow_Loaded;
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await _vm.CheckForUpdatesOnStartupAsync();
         }
 
         private void BtnNewApp_Click(object sender, RoutedEventArgs e)

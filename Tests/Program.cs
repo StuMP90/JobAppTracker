@@ -705,8 +705,53 @@ Key Requirements:
 
                 Console.WriteLine("[PASS] Test 21: Company filtering on main dashboard and database queries verified.");
 
+                // --- TEST 22: Software Updates & GitHub Release Parsing ---
+                Console.WriteLine("\n--- Running Test 22: Software Updates & GitHub Release Parsing ---");
+
+                // 1. Version Comparison Logic
+                Assert(UpdateService.IsNewerVersion("v1.0.3", "1.0.2"), "v1.0.3 is newer than 1.0.2");
+                Assert(UpdateService.IsNewerVersion("v1.1.0", "1.0.2"), "v1.1.0 is newer than 1.0.2");
+                Assert(UpdateService.IsNewerVersion("v2.0.0", "1.0.2"), "v2.0.0 is newer than 1.0.2");
+                Assert(!UpdateService.IsNewerVersion("v1.0.2", "1.0.2"), "v1.0.2 is not newer than 1.0.2");
+                Assert(!UpdateService.IsNewerVersion("v1.0.1", "1.0.2"), "v1.0.1 is not newer than 1.0.2");
+                Assert(UpdateService.IsNewerVersion("1.0.3-preview", "1.0.2"), "Prerelease suffix stripped and compared accurately");
+
+                // 2. Mock GitHub Releases API JSON Parsing
+                string sampleReleaseJson = @"
+                {
+                    ""tag_name"": ""v1.0.3"",
+                    ""name"": ""Release v1.0.3 - Performance Improvements"",
+                    ""body"": ""## What's Changed\n* Added check for updates\n* Bug fixes"",
+                    ""html_url"": ""https://github.com/StuMP90/JobAppTracker/releases/tag/v1.0.3"",
+                    ""assets"": [
+                        {
+                            ""name"": ""JobAppTrackerSetup.exe"",
+                            ""browser_download_url"": ""https://github.com/StuMP90/JobAppTracker/releases/download/v1.0.3/JobAppTrackerSetup.exe""
+                        },
+                        {
+                            ""name"": ""source_code.zip"",
+                            ""browser_download_url"": ""https://github.com/StuMP90/JobAppTracker/archive/refs/tags/v1.0.3.zip""
+                        }
+                    ]
+                }";
+
+                var parsedUpdate = UpdateService.ParseReleaseJson(sampleReleaseJson, "1.0.2");
+                Assert(parsedUpdate.IsUpdateAvailable, "Update parsed as available");
+                Assert(parsedUpdate.LatestVersion == "v1.0.3", "Latest version parsed correctly as v1.0.3");
+                Assert(parsedUpdate.CurrentVersion == "v1.0.2", "Current version parsed correctly as v1.0.2");
+                Assert(parsedUpdate.ReleaseName == "Release v1.0.3 - Performance Improvements", "Release name parsed correctly");
+                Assert(parsedUpdate.ReleaseNotes.Contains("Added check for updates"), "Release notes parsed correctly");
+                Assert(parsedUpdate.ReleasePageUrl == "https://github.com/StuMP90/JobAppTracker/releases/tag/v1.0.3", "Release page URL parsed correctly");
+                Assert(parsedUpdate.DownloadUrl == "https://github.com/StuMP90/JobAppTracker/releases/download/v1.0.3/JobAppTrackerSetup.exe", "Installer download URL parsed correctly");
+
+                // 3. Current Version Same as Release Tag (No update available)
+                var parsedSameVersion = UpdateService.ParseReleaseJson(sampleReleaseJson, "1.0.3");
+                Assert(!parsedSameVersion.IsUpdateAvailable, "Same version parsed as no update available");
+
+                Console.WriteLine("[PASS] Test 22: UpdateService version comparison, semver parsing, and GitHub release payload handling verified.");
+
                 Console.WriteLine();
-                Console.WriteLine("🎉 ALL 21 TEST SUITES PASSED PERFECTLY!");
+                Console.WriteLine("🎉 ALL 22 TEST SUITES PASSED PERFECTLY!");
                 return 0;
             }
             catch (Exception ex)

@@ -203,6 +203,38 @@ namespace JobAppTracker.ViewModels
         public ICommand ExportHtmlCommand { get; }
         public ICommand ExportCsvCommand { get; }
 
+        private bool _isUpdateBannerVisible;
+        public bool IsUpdateBannerVisible
+        {
+            get => _isUpdateBannerVisible;
+            set => SetField(ref _isUpdateBannerVisible, value);
+        }
+
+        private string _latestVersionDisplay = string.Empty;
+        public string LatestVersionDisplay
+        {
+            get => _latestVersionDisplay;
+            set => SetField(ref _latestVersionDisplay, value);
+        }
+
+        private string _latestReleaseUrl = string.Empty;
+        public string LatestReleaseUrl
+        {
+            get => _latestReleaseUrl;
+            set => SetField(ref _latestReleaseUrl, value);
+        }
+
+        private string _latestDownloadUrl = string.Empty;
+        public string LatestDownloadUrl
+        {
+            get => _latestDownloadUrl;
+            set => SetField(ref _latestDownloadUrl, value);
+        }
+
+        public ICommand DismissUpdateBannerCommand { get; }
+        public ICommand DownloadUpdateCommand { get; }
+        public ICommand ViewReleaseNotesCommand { get; }
+
         public MainViewModel(DatabaseService? db = null)
         {
             _db = db ?? new DatabaseService();
@@ -347,8 +379,47 @@ namespace JobAppTracker.ViewModels
                 }
             });
 
+            DismissUpdateBannerCommand = new RelayCommand(() => IsUpdateBannerVisible = false);
+            DownloadUpdateCommand = new RelayCommand(() =>
+            {
+                var url = !string.IsNullOrEmpty(LatestDownloadUrl) ? LatestDownloadUrl : LatestReleaseUrl;
+                AttachmentService.OpenUrl(url);
+            });
+            ViewReleaseNotesCommand = new RelayCommand(() =>
+            {
+                if (!string.IsNullOrEmpty(LatestReleaseUrl))
+                {
+                    AttachmentService.OpenUrl(LatestReleaseUrl);
+                }
+            });
+
             LoadFilterOptions();
             ApplyFilters();
+        }
+
+        public async Task CheckForUpdatesOnStartupAsync()
+        {
+            try
+            {
+                string checkSetting = _db.GetSetting("CheckForUpdatesOnStartup", "true");
+                if (checkSetting.Equals("false", StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                var result = await UpdateService.CheckForUpdatesAsync(AppVersion.TrimStart('v'));
+                if (result.IsUpdateAvailable)
+                {
+                    LatestVersionDisplay = result.LatestVersion;
+                    LatestReleaseUrl = result.ReleasePageUrl;
+                    LatestDownloadUrl = result.DownloadUrl ?? result.ReleasePageUrl;
+                    IsUpdateBannerVisible = true;
+                }
+            }
+            catch
+            {
+                // Silently ignore background check errors on startup for offline resilience
+            }
         }
 
         public void LoadFilterOptions()
