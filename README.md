@@ -37,6 +37,7 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 ### 5. Multi-Criteria Filtering & Sort Sequencing
 - **Flexible Sorting**: Sort by **Last Activity Date** or **Created / Application Date** (both Ascending and Descending).
 - **Report Date Range Selection**: Choose whether date range filtering is based on **Applied / Created Date** or **Last Activity Date**.
+- **Company Filter**: Dedicated company dropdown to quickly isolate all applications submitted to a specific employer (e.g. *Acme Tech Solutions*).
 - **Agency Filter**: Dedicated agency dropdown to isolate multiple positions or CV submissions handled by the same agency (e.g. *Hays*, *Michael Page*).
 - **Expanded Status Options**: Comprehensive status list including `"Closed due to inactivity"`, `"Discussed, bad fit"`, `"Employer changed role"`, and `"Role Cancelled / On Hold"`.
 - **Dynamic Source Management**: Add custom sources (e.g. *Otta*, *Cord*, *AngelList*) on the fly, with auto-persistence to SQLite and full management in Settings.
@@ -80,7 +81,7 @@ JobAppTracker/
 │   ├── ReportsWindow.xaml         # Dedicated reporting, analytics & export window
 │   └── SettingsWindow.xaml        # Preferences, staleness threshold & custom sources manager
 ├── Converters/                  # WPF XAML value converters (staleness, visibility, dates)
-├── Tests/                       # Automated standalone verification test suite (20 test suites)
+├── Tests/                       # Automated standalone verification test suite (21 test suites)
 │   ├── JobAppTracker.Tests.csproj
 │   └── Program.cs
 ├── MainWindow.xaml              # Primary application window & interactive dashboard
@@ -119,7 +120,7 @@ JobAppTracker/
 
 ## Running the Automated Tests
 
-The solution includes a comprehensive, standalone automated test suite (20 test suites) covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, "All except closed/complete" filtering, new finalized statuses, date filtering (Created vs Last Activity), short status changes reporting, audit record editing with parent status synchronization, chronological ordering & deduplication, and filtered overall totals ("X of Y" style):
+The solution includes a comprehensive, standalone automated test suite (21 test suites) covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, "All except closed/complete" filtering, new finalized statuses, date filtering (Created vs Last Activity), short status changes reporting, audit record editing with parent status synchronization, chronological ordering & deduplication, filtered overall totals ("X of Y" style), and dedicated company filtering:
 
 ```powershell
 dotnet run --project Tests/JobAppTracker.Tests.csproj

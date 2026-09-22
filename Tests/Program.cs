@@ -659,8 +659,54 @@ Key Requirements:
 
                 Console.WriteLine("[PASS] Test 20: Overall totals in 'X of Y' style on filtered reports verified.");
 
+                // --- TEST 21: Company Filtering ---
+                Console.WriteLine("\n--- Running Test 21: Company Filtering ---");
+                var distinctCompanies = db.GetDistinctCompanies();
+                Assert(distinctCompanies.Count > 0, "Distinct companies retrieved from database");
+                Assert(distinctCompanies.Contains("Acme Tech Solutions"), "Distinct companies contains 'Acme Tech Solutions'");
+
+                // 1. Filter by specific company
+                var acmeFilter = new ApplicationFilter { Company = "Acme Tech Solutions" };
+                var acmeApps = db.GetApplications(acmeFilter);
+                Assert(acmeApps.Count > 0, "Filtered applications found for Acme Tech Solutions");
+                Assert(acmeApps.All(a => string.Equals(a.Company, "Acme Tech Solutions", StringComparison.OrdinalIgnoreCase)),
+                    "All returned applications have Company = 'Acme Tech Solutions'");
+
+                // 2. Case-insensitive company filtering
+                var acmeLowerFilter = new ApplicationFilter { Company = "acme tech solutions" };
+                var acmeLowerApps = db.GetApplications(acmeLowerFilter);
+                Assert(acmeLowerApps.Count == acmeApps.Count, "Company filter is case-insensitive");
+
+                // 3. 'All' company filter returns all applications
+                var allCompanyFilter = new ApplicationFilter { Company = "All" };
+                var allCompanyApps = db.GetApplications(allCompanyFilter);
+                Assert(allCompanyApps.Count == db.GetApplications().Count,
+                    "Company = 'All' returns all applications without filtering");
+
+                // 4. Multiple applications for the same company
+                var secondAcmeApp = new JobApplication
+                {
+                    AppliedDate = DateTime.Today.AddDays(-2),
+                    JobTitle = "Lead Architect",
+                    Company = "Acme Tech Solutions",
+                    Source = "Direct",
+                    ApplicationMethod = "Company Portal",
+                    CurrentStatus = "Applied"
+                };
+                db.SaveApplication(secondAcmeApp);
+
+                var refreshedAcmeApps = db.GetApplications(new ApplicationFilter { Company = "Acme Tech Solutions" });
+                Assert(refreshedAcmeApps.Count == acmeApps.Count + 1, "Multiple applications for same company isolated by company filter");
+
+                // Verify distinct companies does not duplicate Acme Tech Solutions
+                var refreshedCompanies = db.GetDistinctCompanies();
+                Assert(refreshedCompanies.Count(c => string.Equals(c, "Acme Tech Solutions", StringComparison.OrdinalIgnoreCase)) == 1,
+                    "Distinct companies list contains no duplicates for same company");
+
+                Console.WriteLine("[PASS] Test 21: Company filtering on main dashboard and database queries verified.");
+
                 Console.WriteLine();
-                Console.WriteLine("🎉 ALL 20 TEST SUITES PASSED PERFECTLY!");
+                Console.WriteLine("🎉 ALL 21 TEST SUITES PASSED PERFECTLY!");
                 return 0;
             }
             catch (Exception ex)

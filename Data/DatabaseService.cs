@@ -184,15 +184,15 @@ namespace JobAppTracker.Data
                     cmd.Parameters.AddWithValue("@method", filter.Method);
                 }
 
-                if (!string.IsNullOrWhiteSpace(filter.Company))
+                if (!string.IsNullOrWhiteSpace(filter.Company) && filter.Company != "All")
                 {
-                    sb.Append(" AND a.Company LIKE @company");
-                    cmd.Parameters.AddWithValue("@company", $"%{filter.Company.Trim()}%");
+                    sb.Append(" AND a.Company = @company COLLATE NOCASE");
+                    cmd.Parameters.AddWithValue("@company", filter.Company.Trim());
                 }
 
                 if (!string.IsNullOrWhiteSpace(filter.Agency) && filter.Agency != "All")
                 {
-                    sb.Append(" AND a.Agency = @agency");
+                    sb.Append(" AND a.Agency = @agency COLLATE NOCASE");
                     cmd.Parameters.AddWithValue("@agency", filter.Agency.Trim());
                 }
 
@@ -974,6 +974,24 @@ namespace JobAppTracker.Data
             cmd.CommandText = "DELETE FROM Sources WHERE Name = @n";
             cmd.Parameters.AddWithValue("@n", sourceName.Trim());
             cmd.ExecuteNonQuery();
+        }
+
+        public List<string> GetDistinctCompanies()
+        {
+            var list = new List<string>();
+            using var conn = CreateConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT Company FROM Applications WHERE Company IS NOT NULL AND TRIM(Company) <> '' ORDER BY Company COLLATE NOCASE";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var s = reader.GetString(0).Trim();
+                if (!string.IsNullOrWhiteSpace(s) && !list.Contains(s, StringComparer.OrdinalIgnoreCase))
+                {
+                    list.Add(s);
+                }
+            }
+            return list;
         }
 
         public List<string> GetDistinctAgencies()

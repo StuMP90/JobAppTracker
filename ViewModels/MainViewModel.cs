@@ -34,6 +34,7 @@ namespace JobAppTracker.ViewModels
         public List<string> SourceOptions { get; private set; } = new();
         public List<string> MethodOptions { get; private set; } = new();
         public List<string> AgencyOptions { get; private set; } = new();
+        public List<string> CompanyOptions { get; private set; } = new();
 
         public JobApplication? SelectedApplication
         {
@@ -105,6 +106,19 @@ namespace JobAppTracker.ViewModels
             set
             {
                 if (SetField(ref _selectedAgency, value))
+                {
+                    ApplyFilters();
+                }
+            }
+        }
+
+        private string _selectedCompany = "All";
+        public string SelectedCompany
+        {
+            get => _selectedCompany;
+            set
+            {
+                if (SetField(ref _selectedCompany, value))
                 {
                     ApplyFilters();
                 }
@@ -345,6 +359,11 @@ namespace JobAppTracker.ViewModels
             agencies.AddRange(_db.GetDistinctAgencies());
             AgencyOptions = agencies;
             OnPropertyChanged(nameof(AgencyOptions));
+
+            var companies = new List<string> { "All" };
+            companies.AddRange(_db.GetDistinctCompanies());
+            CompanyOptions = companies;
+            OnPropertyChanged(nameof(CompanyOptions));
         }
 
         public ApplicationFilter GetCurrentFilter()
@@ -353,6 +372,7 @@ namespace JobAppTracker.ViewModels
             {
                 SearchText = SearchText,
                 Status = SelectedStatus,
+                Company = SelectedCompany,
                 Source = SelectedSource,
                 Method = SelectedMethod,
                 Agency = SelectedAgency,
@@ -411,6 +431,7 @@ namespace JobAppTracker.ViewModels
         {
             _searchText = string.Empty;
             _selectedStatus = "All";
+            _selectedCompany = "All";
             _selectedSource = "All";
             _selectedMethod = "All";
             _selectedAgency = "All";
@@ -419,6 +440,7 @@ namespace JobAppTracker.ViewModels
 
             OnPropertyChanged(nameof(SearchText));
             OnPropertyChanged(nameof(SelectedStatus));
+            OnPropertyChanged(nameof(SelectedCompany));
             OnPropertyChanged(nameof(SelectedSource));
             OnPropertyChanged(nameof(SelectedMethod));
             OnPropertyChanged(nameof(SelectedAgency));

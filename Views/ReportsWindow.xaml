@@ -49,21 +49,23 @@
             <StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.5*" MinWidth="130"/>
+                        <ColumnDefinition Width="140"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="135"/>
+                        <ColumnDefinition Width="120"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="105"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="135"/>
+                        <ColumnDefinition Width="90"/>
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="130"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="120"/>
                         <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
@@ -79,36 +81,41 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="4">
+                        <TextBlock Text="Company" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="CmbCompany" Height="30" SelectionChanged="Filter_Changed"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="6">
                         <TextBlock Text="Agency" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox x:Name="CmbAgency" Height="30" SelectionChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="6">
+                    <StackPanel Grid.Column="8">
                         <TextBlock Text="Source" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox x:Name="CmbSource" Height="30" SelectionChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="8">
+                    <StackPanel Grid.Column="10">
                         <TextBlock Text="Sort Sequence" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox x:Name="CmbSort" Height="30" SelectionChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="10">
+                    <StackPanel Grid.Column="12">
                         <TextBlock Text="Date Field" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox x:Name="CmbDateType" Height="30" SelectionChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="12">
+                    <StackPanel Grid.Column="14">
                         <TextBlock Text="From Date" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <DatePicker x:Name="DpFromDate" Height="30" SelectedDateChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="14">
+                    <StackPanel Grid.Column="16">
                         <TextBlock Text="To Date" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <DatePicker x:Name="DpToDate" Height="30" SelectedDateChanged="Filter_Changed"/>
                     </StackPanel>
 
-                    <Button Grid.Column="16" Content="Reset" VerticalAlignment="Bottom" Height="30" Padding="12,0" 
+                    <Button Grid.Column="18" Content="Reset" VerticalAlignment="Bottom" Height="30" Padding="12,0" 
                             Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnResetFilters_Click"/>
                 </Grid>
 

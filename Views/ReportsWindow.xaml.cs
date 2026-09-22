@@ -39,6 +39,11 @@ namespace JobAppTracker.Views
             CmbAgency.ItemsSource = agencies;
             CmbAgency.SelectedIndex = 0;
 
+            var companies = new List<string> { "All" };
+            companies.AddRange(_db.GetDistinctCompanies());
+            CmbCompany.ItemsSource = companies;
+            CmbCompany.SelectedIndex = 0;
+
             CmbSort.ItemsSource = new List<string>
             {
                 "Last Activity (Recent First)",
@@ -90,6 +95,7 @@ namespace JobAppTracker.Views
             bool isFiltered = (filter.FromDate.HasValue || filter.ToDate.HasValue ||
                                !string.IsNullOrWhiteSpace(filter.SearchText) ||
                                (filter.Status != "All" && !string.IsNullOrWhiteSpace(filter.Status)) ||
+                               (filter.Company != "All" && !string.IsNullOrWhiteSpace(filter.Company)) ||
                                (filter.Agency != "All" && !string.IsNullOrWhiteSpace(filter.Agency)) ||
                                (filter.Source != "All" && !string.IsNullOrWhiteSpace(filter.Source)) ||
                                _currentSummary.TotalApplications != _overallSummary.TotalApplications);
@@ -146,6 +152,7 @@ namespace JobAppTracker.Views
             {
                 SearchText = TxtSearch.Text?.Trim(),
                 Status = CmbStatus.SelectedItem?.ToString() ?? "All",
+                Company = CmbCompany?.SelectedItem?.ToString() ?? "All",
                 Agency = CmbAgency.SelectedItem?.ToString() ?? "All",
                 Source = CmbSource.SelectedItem?.ToString() ?? "All",
                 DateFilterType = dateType,
@@ -182,6 +189,7 @@ namespace JobAppTracker.Views
         {
             TxtSearch.Text = string.Empty;
             CmbStatus.SelectedIndex = 0;
+            if (CmbCompany != null) CmbCompany.SelectedIndex = 0;
             CmbAgency.SelectedIndex = 0;
             CmbSource.SelectedIndex = 0;
             CmbSort.SelectedIndex = 0;
