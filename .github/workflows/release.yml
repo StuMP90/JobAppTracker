@@ -39,10 +39,19 @@ jobs:
         run: choco install innosetup --no-progress
 
       - name: Compile Windows Installer
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
-        # Note: If windows-latest installs Inno Setup 7, fallback logic handles both:
         shell: powershell
+        run: |
+          $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue)?.Source
+          if (-not $iscc) {
+            $candidates = @(
+              "C:\Program Files\Inno Setup 7\ISCC.exe",
+              "C:\Program Files (x86)\Inno Setup 7\ISCC.exe",
+              "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+            )
+            foreach ($c in $candidates) { if (Test-Path $c) { $iscc = $c; break; } }
+          }
+          if (-not $iscc) { throw "ISCC.exe not found" }
+          & $iscc installer.iss
 
       # -------------------------------------------------------------
       # SIGNPATH CODE SIGNING (Uncomment after SignPath approval):
