@@ -29,7 +29,7 @@ Compression=lzma2/max
 SolidCompression=yes
 
 ; Architecture (64-bit native Windows)
-ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 

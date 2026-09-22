@@ -33,25 +33,13 @@ jobs:
             -r win-x64 `
             --self-contained true `
             -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true
-
-      - name: Install Inno Setup
-        run: choco install innosetup --no-progress
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            --output "bin/Release/net8.0-windows/win-x64/publish"
 
       - name: Compile Windows Installer
-        shell: powershell
-        run: |
-          $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue)?.Source
-          if (-not $iscc) {
-            $candidates = @(
-              "C:\Program Files\Inno Setup 7\ISCC.exe",
-              "C:\Program Files (x86)\Inno Setup 7\ISCC.exe",
-              "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-            )
-            foreach ($c in $candidates) { if (Test-Path $c) { $iscc = $c; break; } }
-          }
-          if (-not $iscc) { throw "ISCC.exe not found" }
-          & $iscc installer.iss
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer.iss
 
       # -------------------------------------------------------------
       # SIGNPATH CODE SIGNING (Uncomment after SignPath approval):
@@ -74,6 +62,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           name: Release ${{ github.ref_name }}
           files: dist/JobAppTrackerSetup.exe
           draft: false
