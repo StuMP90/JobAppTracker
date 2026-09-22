@@ -130,14 +130,53 @@ dotnet run --project Tests/JobAppTracker.Tests.csproj
 
 ## Building the Windows Installer
 
-To build a standalone, self-contained Windows Installer (`JobAppTrackerSetup.exe`):
+To build a standalone, self-contained Windows Installer (`JobAppTrackerSetup.exe`) locally:
 
 1. Ensure **[Inno Setup 7](https://jrsoftware.org/isinfo.php)** is installed.
 2. Run the automated build script:
    ```powershell
    .\build-installer.ps1
    ```
-This script executes the test suite, publishes the self-contained 64-bit application, and compiles the installer into `dist\JobAppTrackerSetup.exe`.
+This script executes the test suite, publishes the self-contained 64-bit application, and compiles the installer into `dist\JobAppTrackerSetup.exe` with the version defined in `JobAppTracker.csproj`.
+
+---
+
+## Publishing a New Release
+
+The repository is configured with a GitHub Actions workflow (`.github/workflows/release.yml`) that automatically builds, tests, packages, and publishes a new GitHub Release with the Windows installer whenever a version tag (`v*`) is pushed.
+
+### Steps to Release:
+
+1. **Commit and push all changes to `main`**:
+   ```powershell
+   git add .
+   git commit -m "Prepare release v1.0.2"
+   git push origin main
+   ```
+
+2. **Create and push an annotated git tag**:
+   ```powershell
+   # Create the tag (replace 1.0.2 with your target version)
+   git tag -a v1.0.2 -m "Release v1.0.2"
+
+   # Push the tag to GitHub
+   git push origin v1.0.2
+   ```
+
+3. **Automated CI/CD Pipeline**:
+   - The workflow triggers automatically on GitHub.
+   - Extracts the version directly from the tag name (e.g. `1.0.2`).
+   - Runs all 21 automated verification tests.
+   - Publishes the 64-bit self-contained executable with the version embedded.
+   - Compiles `JobAppTrackerSetup.exe` with the version stamped.
+   - Publishes a new GitHub Release with auto-generated release notes and attaches `JobAppTrackerSetup.exe`.
+
+> [!TIP]
+> If you ever need to delete or retag a release locally and remotely:
+> ```powershell
+> git tag -d v1.0.2
+> git push origin --delete v1.0.2
+> ```
 
 ---
 

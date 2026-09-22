@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
@@ -23,6 +24,18 @@ namespace JobAppTracker.ViewModels
         private string _activeQuickFilter = "All"; // All, Active, Stale, Interviews, Final
         private int _staleDaysThreshold = 14;
         private ReportSummary _summary = new();
+
+        public static string AppVersion
+        {
+            get
+            {
+                var ver = Assembly.GetExecutingAssembly().GetName().Version;
+                return ver != null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v1.0.2";
+            }
+        }
+
+        public string AppVersionDisplay => AppVersion;
+        public string WindowTitle => $"Job Application Tracker - {AppVersion}";
 
         public DatabaseService Database => _db;
 

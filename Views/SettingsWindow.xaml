@@ -4,11 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Settings &amp; Preferences" Height="580" Width="580"
+        Title="Settings &amp; Preferences" Height="640" MinHeight="520" Width="600" MinWidth="520"
         WindowStartupLocation="CenterOwner"
         Background="#F8FAFC"
         FontFamily="Segoe UI"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Icon="/app.ico">
     <Grid Margin="24">
         <Grid.RowDefinitions>
@@ -19,9 +19,10 @@
 
         <TextBlock Grid.Row="0" Text="⚙️ Application Settings" FontSize="18" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,16"/>
 
-        <StackPanel Grid.Row="1">
-            <!-- Staleness Setting -->
-            <Border Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14" Margin="0,0,0,16">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,10,0">
+            <StackPanel Margin="0,0,0,10">
+                <!-- Staleness Setting -->
+                <Border Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="Staleness Alert Threshold" FontWeight="SemiBold" Foreground="#0F172A"/>
                     <TextBlock Text="Applications without an update for this many days will be flagged as stale." FontSize="12" Foreground="#64748B" Margin="0,2,0,8"/>
@@ -68,21 +69,25 @@
                 </StackPanel>
             </Border>
 
-            <!-- Database Location -->
-            <Border Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14">
-                <StackPanel>
-                    <TextBlock Text="Local SQLite Database" FontWeight="SemiBold" Foreground="#0F172A"/>
-                    <TextBlock x:Name="TxtDbPath" Text="..." FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,4,0,8"/>
-                    <Button Content="📂 Open Data Folder" HorizontalAlignment="Left" Padding="10,5" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnOpenFolder_Click"/>
-                </StackPanel>
-            </Border>
-        </StackPanel>
+                <!-- Database Location -->
+                <Border Background="White" CornerRadius="6" BorderBrush="#E2E8F0" BorderThickness="1" Padding="14">
+                    <StackPanel>
+                        <TextBlock Text="Local SQLite Database" FontWeight="SemiBold" Foreground="#0F172A"/>
+                        <TextBlock x:Name="TxtDbPath" Text="..." FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,4,0,8"/>
+                        <Button Content="📂 Open Data Folder" HorizontalAlignment="Left" Padding="10,5" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnOpenFolder_Click"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
 
         <Border Grid.Row="2" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="0,14,0,0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Cancel" Width="80" Height="32" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnCancel_Click"/>
-                <Button Content="Save Settings" Width="110" Height="32" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnSave_Click"/>
-            </StackPanel>
+            <DockPanel LastChildFill="False">
+                <TextBlock x:Name="TxtAppVersion" FontSize="11" Foreground="#94A3B8" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <Button Content="Cancel" Width="80" Height="32" Margin="0,0,10,0" Background="#F1F5F9" BorderBrush="#CBD5E1" Click="BtnCancel_Click"/>
+                    <Button Content="Save Settings" Width="110" Height="32" Background="#2563EB" Foreground="White" FontWeight="SemiBold" BorderThickness="0" Click="BtnSave_Click"/>
+                </StackPanel>
+            </DockPanel>
         </Border>
     </Grid>
 </Window>

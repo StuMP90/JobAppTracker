@@ -2,7 +2,9 @@
 ; Generates self-contained 64-bit Windows installer
 
 #define MyAppName "JobAppTracker"
-#define MyAppVersion "1.0.0"
+#ifndef MyAppVersion
+#define MyAppVersion "1.0.2"
+#endif
 #define MyAppPublisher "JobAppTracker"
 #define MyAppExeName "JobAppTracker.exe"
 
@@ -29,7 +31,7 @@ Compression=lzma2/max
 SolidCompression=yes
 
 ; Architecture (64-bit native Windows)
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 

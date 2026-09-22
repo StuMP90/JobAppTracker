@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using JobAppTracker.Data;
+using JobAppTracker.ViewModels;
 
 namespace JobAppTracker.Views
 {
@@ -19,6 +20,7 @@ namespace JobAppTracker.Views
 
             TxtStaleDays.Text = currentStaleDays.ToString();
             TxtDbPath.Text = db.DatabasePath;
+            TxtAppVersion.Text = $"JobAppTracker {MainViewModel.AppVersion}";
 
             LoadSources();
         }

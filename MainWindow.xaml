@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:conv="clr-namespace:JobAppTracker.Converters"
         mc:Ignorable="d"
-        Title="Job Application Tracker" Height="820" Width="1360"
+        Title="{Binding WindowTitle, FallbackValue='Job Application Tracker'}" Height="820" Width="1360"
         WindowStartupLocation="CenterScreen"
         Background="#F1F5F9"
         FontFamily="Segoe UI"
@@ -55,8 +55,13 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="💼" FontSize="22" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <StackPanel>
-                        <TextBlock Text="Job Application Tracker" FontSize="18" FontWeight="Bold" Foreground="White"/>
-                        <TextBlock Text="Manage job search, speculative agency CVs, specs &amp; follow-ups" FontSize="11" Foreground="#94A3B8"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Job Application Tracker" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                            <Border Background="#334155" CornerRadius="4" Margin="10,0,0,0" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding AppVersionDisplay}" FontSize="11" Foreground="#94A3B8" FontWeight="SemiBold"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Manage job search, speculative agency CVs, specs &amp; follow-ups" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,0"/>
                     </StackPanel>
                 </StackPanel>
 

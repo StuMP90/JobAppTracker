@@ -3,14 +3,22 @@
 # =====================================================================
 [CmdletBinding()]
 param(
-    [switch]$SkipTests = $false
+    [switch]$SkipTests = $false,
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = $PSScriptRoot
 
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    [xml]$proj = Get-Content "$ProjectRoot\JobAppTracker.csproj"
+    $Version = $proj.Project.PropertyGroup.Version
+    if (-not $Version) { $Version = "1.0.2" }
+}
+
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host "     JobAppTracker Windows Installer Builder      " -ForegroundColor Cyan
+Write-Host "     Target Version: $Version                     " -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 
 # 1. Verification Tests
@@ -26,7 +34,7 @@ if (-not $SkipTests) {
 }
 
 # 2. Publish Self-Contained Release
-Write-Host "`n[2/4] Publishing self-contained 64-bit application..." -ForegroundColor Yellow
+Write-Host "`n[2/4] Publishing self-contained 64-bit application (v$Version)..." -ForegroundColor Yellow
 $PublishDir = "$ProjectRoot\bin\Release\net8.0-windows\win-x64\publish"
 if (Test-Path $PublishDir) {
     Remove-Item -Recurse -Force $PublishDir -ErrorAction SilentlyContinue
@@ -37,7 +45,9 @@ dotnet publish "$ProjectRoot\JobAppTracker.csproj" `
     -r win-x64 `
     --self-contained true `
     -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true
+    -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:Version=$Version `
+    --output "$PublishDir"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "dotnet publish failed."
@@ -78,7 +88,7 @@ Write-Host "Found Inno Setup at: $IsccPath" -ForegroundColor Green
 # 4. Compile Installer
 Write-Host "`n[4/4] Compiling Windows Installer..." -ForegroundColor Yellow
 $IssFile = "$ProjectRoot\installer.iss"
-& $IsccPath $IssFile
+& $IsccPath "/DMyAppVersion=$Version" $IssFile
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Inno Setup compilation failed."

@@ -23,6 +23,14 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Extract Release Version
+        shell: pwsh
+        run: |
+          $raw = "${{ github.ref_name }}"
+          $ver = if ($raw -match '^v?(\d+\.\d+\.\d+.*)$') { $matches[1] } else { "1.0.2" }
+          echo "APP_VER=$ver" >> $env:GITHUB_ENV
+          Write-Host "Configured release version: $ver"
+
       - name: Run Automated Verification Tests
         run: dotnet run --project Tests/JobAppTracker.Tests.csproj
 
@@ -34,12 +42,14 @@ jobs:
             --self-contained true `
             -p:PublishSingleFile=true `
             -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:Version=${{ env.APP_VER }} `
             --output "bin/Release/net8.0-windows/win-x64/publish"
 
       - name: Compile Windows Installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
           path: installer.iss
+          options: /DMyAppVersion=${{ env.APP_VER }}
 
       # -------------------------------------------------------------
       # SIGNPATH CODE SIGNING (Uncomment after SignPath approval):
