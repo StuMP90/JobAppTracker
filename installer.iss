@@ -3,7 +3,7 @@
 
 #define MyAppName "JobAppTracker"
 #ifndef MyAppVersion
-#define MyAppVersion "1.0.2"
+#define MyAppVersion "1.0.5"
 #endif
 #define MyAppPublisher "JobAppTracker"
 #define MyAppExeName "JobAppTracker.exe"

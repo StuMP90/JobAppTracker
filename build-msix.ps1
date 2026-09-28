@@ -14,7 +14,7 @@ $ProjectRoot = $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($Version)) {
     [xml]$proj = Get-Content "$ProjectRoot\JobAppTracker.csproj"
     $baseVer = $proj.Project.PropertyGroup.Version
-    if (-not $baseVer) { $baseVer = "1.0.2" }
+    if (-not $baseVer) { $baseVer = "1.0.5" }
     
     $parts = $baseVer.Split('.')
     if ($parts.Length -eq 3) {

@@ -8,7 +8,7 @@
   <Identity
     Name="StuartMillington.JobAppTracker"
     Publisher="CN=529FDF67-B7DF-484B-92AA-C7F1E5E8608C"
-    Version="1.0.2.0"
+    Version="1.0.5.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
