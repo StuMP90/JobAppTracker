@@ -84,6 +84,123 @@ namespace JobAppTracker.Tests
             }
         }
 
+        public static int GenerateStoreAssets(string outputDir)
+        {
+            try
+            {
+                Directory.CreateDirectory(outputDir);
+                Console.WriteLine($"Generating Windows Store / MSIX visual assets in: {outputDir}");
+
+                // 1. StoreLogo (50x50, scales)
+                SaveSquareIcon(Path.Combine(outputDir, "StoreLogo.png"), 50);
+                SaveSquareIcon(Path.Combine(outputDir, "StoreLogo.scale-100.png"), 50);
+                SaveSquareIcon(Path.Combine(outputDir, "StoreLogo.scale-125.png"), 63);
+                SaveSquareIcon(Path.Combine(outputDir, "StoreLogo.scale-150.png"), 75);
+                SaveSquareIcon(Path.Combine(outputDir, "StoreLogo.scale-200.png"), 100);
+                SaveSquareIcon(Path.Combine(outputDir, "StoreLogo.scale-400.png"), 200);
+
+                // 2. Square44x44Logo (App list, taskbar, settings)
+                SaveSquareIcon(Path.Combine(outputDir, "Square44x44Logo.png"), 44);
+                SaveSquareIcon(Path.Combine(outputDir, "Square44x44Logo.scale-100.png"), 44);
+                SaveSquareIcon(Path.Combine(outputDir, "Square44x44Logo.scale-125.png"), 55);
+                SaveSquareIcon(Path.Combine(outputDir, "Square44x44Logo.scale-150.png"), 66);
+                SaveSquareIcon(Path.Combine(outputDir, "Square44x44Logo.scale-200.png"), 88);
+                SaveSquareIcon(Path.Combine(outputDir, "Square44x44Logo.scale-400.png"), 176);
+
+                // Target sizes for taskbar / unplated
+                int[] targetSizes = new int[] { 16, 24, 32, 48, 256 };
+                foreach (int ts in targetSizes)
+                {
+                    SaveSquareIcon(Path.Combine(outputDir, $"Square44x44Logo.targetsize-{ts}.png"), ts);
+                    SaveSquareIcon(Path.Combine(outputDir, $"Square44x44Logo.altform-unplated_targetsize-{ts}.png"), ts);
+                    SaveSquareIcon(Path.Combine(outputDir, $"Square44x44Logo.altform-lightunplated_targetsize-{ts}.png"), ts);
+                }
+
+                // 3. Square150x150Logo (Medium tile)
+                SaveSquareIcon(Path.Combine(outputDir, "Square150x150Logo.png"), 150);
+                SaveSquareIcon(Path.Combine(outputDir, "Square150x150Logo.scale-100.png"), 150);
+                SaveSquareIcon(Path.Combine(outputDir, "Square150x150Logo.scale-125.png"), 188);
+                SaveSquareIcon(Path.Combine(outputDir, "Square150x150Logo.scale-150.png"), 225);
+                SaveSquareIcon(Path.Combine(outputDir, "Square150x150Logo.scale-200.png"), 300);
+                SaveSquareIcon(Path.Combine(outputDir, "Square150x150Logo.scale-400.png"), 600);
+
+                // 4. Square310x310Logo (Large tile)
+                SaveSquareIcon(Path.Combine(outputDir, "Square310x310Logo.png"), 310);
+                SaveSquareIcon(Path.Combine(outputDir, "Square310x310Logo.scale-100.png"), 310);
+                SaveSquareIcon(Path.Combine(outputDir, "Square310x310Logo.scale-200.png"), 620);
+
+                // 5. Wide310x150Logo (Wide tile)
+                SaveWideImage(Path.Combine(outputDir, "Wide310x150Logo.png"), 310, 150);
+                SaveWideImage(Path.Combine(outputDir, "Wide310x150Logo.scale-100.png"), 310, 150);
+                SaveWideImage(Path.Combine(outputDir, "Wide310x150Logo.scale-125.png"), 388, 188);
+                SaveWideImage(Path.Combine(outputDir, "Wide310x150Logo.scale-150.png"), 465, 225);
+                SaveWideImage(Path.Combine(outputDir, "Wide310x150Logo.scale-200.png"), 620, 300);
+                SaveWideImage(Path.Combine(outputDir, "Wide310x150Logo.scale-400.png"), 1240, 600);
+
+                // 6. SplashScreen (Splash Screen)
+                SaveWideImage(Path.Combine(outputDir, "SplashScreen.png"), 620, 300);
+                SaveWideImage(Path.Combine(outputDir, "SplashScreen.scale-100.png"), 620, 300);
+                SaveWideImage(Path.Combine(outputDir, "SplashScreen.scale-125.png"), 775, 375);
+                SaveWideImage(Path.Combine(outputDir, "SplashScreen.scale-150.png"), 930, 450);
+                SaveWideImage(Path.Combine(outputDir, "SplashScreen.scale-200.png"), 1240, 600);
+                SaveWideImage(Path.Combine(outputDir, "SplashScreen.scale-400.png"), 2480, 1200);
+
+                // 7. Store Listing High-Resolution Assets (Partner Center Dashboard)
+                SaveSquareIcon(Path.Combine(outputDir, "StoreListingIcon-512.png"), 512);
+                SaveSquareIcon(Path.Combine(outputDir, "StoreListingIcon-1024.png"), 1024);
+
+                Console.WriteLine("Successfully generated all Store & MSIX visual assets!");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error generating store assets: {ex.Message}\n{ex.StackTrace}");
+                return 1;
+            }
+        }
+
+        private static void SaveSquareIcon(string filePath, int size)
+        {
+            var visual = new DrawingVisual();
+            using (var dc = visual.RenderOpen())
+            {
+                RenderIcon(dc, size);
+            }
+
+            var rtb = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(visual);
+
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+            encoder.Save(fs);
+        }
+
+        private static void SaveWideImage(string filePath, int width, int height)
+        {
+            var visual = new DrawingVisual();
+            using (var dc = visual.RenderOpen())
+            {
+                double iconSize = Math.Min(width, height) * 0.8;
+                double offsetX = (width - iconSize) / 2.0;
+                double offsetY = (height - iconSize) / 2.0;
+
+                dc.PushTransform(new TranslateTransform(offsetX, offsetY));
+                RenderIcon(dc, iconSize);
+                dc.Pop();
+            }
+
+            var rtb = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(visual);
+
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+            encoder.Save(fs);
+        }
+
         private static void RenderIcon(DrawingContext dc, double size)
         {
             // 1. Background squircle badge with sleek gradient

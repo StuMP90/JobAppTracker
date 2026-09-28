@@ -54,13 +54,6 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 - **CSV Export**: Export all records or filtered views to CSV for Microsoft Excel and Google Sheets, supporting both full audit notes or concise status change history.
 - **Summary Clipboard Export**: Copy formatted markdown/text summaries directly to the clipboard.
 
-### 7. Software Updates & Version Checking
-- **Automatic Background Check on Launch**: Quietly verifies against the latest GitHub Release in the background on startup (non-blocking, timeout-resilient). If a newer version is detected, a dismissible notification banner appears.
-- **Dual-Action Update Buttons**:
-  - **`[⬇️ Download Installer]`**: Directly triggers downloading `JobAppTrackerSetup.exe` from GitHub.
-  - **`[🌐 Release Notes]`**: Opens the GitHub release page to inspect the changelog and list of improvements.
-- **Manual Check in Settings**: On-demand **"🔍 Check for Updates Now"** button and startup toggle in the Settings dialog.
-
 ---
 
 ## Project Structure
@@ -73,12 +66,10 @@ JobAppTracker/
 │   ├── ApplicationFilter.cs     # Multi-criteria filter, sort parameters, and report metrics models
 │   ├── ApplicationUpdate.cs     # Audit trail event model
 │   ├── Attachment.cs            # File attachment metadata model
-│   ├── JobApplication.cs        # Primary job application data model
-│   └── UpdateInfo.cs            # GitHub release update check result model
+│   └── JobApplication.cs        # Primary job application data model
 ├── Services/
 │   ├── AttachmentService.cs     # Attachment management, file launching, and browser opening
-│   ├── ExportService.cs         # HTML printable report, single-app dossier, and CSV export engine
-│   └── UpdateService.cs         # GitHub Releases API client, semver comparison & asset parsing
+│   └── ExportService.cs         # HTML printable report, single-app dossier, and CSV export engine
 ├── ViewModels/
 │   ├── MainViewModel.cs         # WPF MVVM ViewModel for dashboard state, filtering, and commands
 │   └── RelayCommand.cs          # ICommand implementation
@@ -88,9 +79,9 @@ JobAppTracker/
 │   ├── ApplicationEditWindow.xaml # Create / Edit application dialog & attachment manager
 │   ├── EditUpdateWindow.xaml      # Edit audit trail event & correct status dialog
 │   ├── ReportsWindow.xaml         # Dedicated reporting, analytics & export window
-│   └── SettingsWindow.xaml        # Preferences, staleness threshold, software updates & sources
+│   └── SettingsWindow.xaml        # Preferences, staleness threshold & custom sources manager
 ├── Converters/                  # WPF XAML value converters (staleness, visibility, dates)
-├── Tests/                       # Automated standalone verification test suite (22 test suites)
+├── Tests/                       # Automated standalone verification test suite (21 test suites)
 │   ├── JobAppTracker.Tests.csproj
 │   └── Program.cs
 ├── MainWindow.xaml              # Primary application window & interactive dashboard
@@ -129,7 +120,7 @@ JobAppTracker/
 
 ## Running the Automated Tests
 
-The solution includes a comprehensive, standalone automated test suite (22 test suites) covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, "All except closed/complete" filtering, new finalized statuses, date filtering (Created vs Last Activity), short status changes reporting, audit record editing with parent status synchronization, chronological ordering & deduplication, filtered overall totals ("X of Y" style), dedicated company filtering, and GitHub release update checking & semver comparison:
+The solution includes a comprehensive, standalone automated test suite (21 test suites) covering SQLite database operations, CV submissions, staleness tracking, audit trail logging, agency filtering, custom sources, sort sequencing, HTML/CSV exports, single application dossiers, "All except closed/complete" filtering, new finalized statuses, date filtering (Created vs Last Activity), short status changes reporting, audit record editing with parent status synchronization, chronological ordering & deduplication, filtered overall totals ("X of Y" style), and dedicated company filtering:
 
 ```powershell
 dotnet run --project Tests/JobAppTracker.Tests.csproj
