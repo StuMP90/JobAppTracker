@@ -163,7 +163,7 @@
                 <!-- Search and Filters on Left -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Search Box -->
-                    <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Width="180" Height="32" Margin="0,0,10,0">
+                    <Border Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Width="180" Height="32" Margin="0,0,10,0" VerticalAlignment="Center">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28"/>
@@ -177,37 +177,37 @@
                     </Border>
 
                     <!-- Status Filter -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
                         <TextBlock Text="Status:" VerticalAlignment="Center" FontSize="11" Foreground="#64748B" Margin="0,0,4,0"/>
                         <ComboBox ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" Width="160" Height="32" FontSize="12"/>
                     </StackPanel>
 
                     <!-- Company Filter -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
                         <TextBlock Text="Company:" VerticalAlignment="Center" FontSize="11" Foreground="#64748B" Margin="0,0,4,0"/>
                         <ComboBox ItemsSource="{Binding CompanyOptions}" SelectedItem="{Binding SelectedCompany}" Width="130" Height="32" FontSize="12"/>
                     </StackPanel>
 
                     <!-- Agency Filter -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
                         <TextBlock Text="Agency:" VerticalAlignment="Center" FontSize="11" Foreground="#64748B" Margin="0,0,4,0"/>
                         <ComboBox ItemsSource="{Binding AgencyOptions}" SelectedItem="{Binding SelectedAgency}" Width="120" Height="32" FontSize="12"/>
                     </StackPanel>
 
                     <!-- Source Filter -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
                         <TextBlock Text="Source:" VerticalAlignment="Center" FontSize="11" Foreground="#64748B" Margin="0,0,4,0"/>
                         <ComboBox ItemsSource="{Binding SourceOptions}" SelectedItem="{Binding SelectedSource}" Width="110" Height="32" FontSize="12"/>
                     </StackPanel>
 
                     <!-- Method Filter -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
                         <TextBlock Text="Method:" VerticalAlignment="Center" FontSize="11" Foreground="#64748B" Margin="0,0,4,0"/>
                         <ComboBox ItemsSource="{Binding MethodOptions}" SelectedItem="{Binding SelectedMethod}" Width="105" Height="32" FontSize="12"/>
                     </StackPanel>
 
                     <!-- Sort Sequence -->
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Sort:" VerticalAlignment="Center" FontSize="11" Foreground="#64748B" Margin="0,0,4,0"/>
                         <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSortSequence}" Width="175" Height="32" FontSize="12"/>
                     </StackPanel>

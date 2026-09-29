@@ -1,9 +1,18 @@
-﻿<Application x:Class="JobAppTracker.App"
+<Application x:Class="JobAppTracker.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:JobAppTracker"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Global ComboBox Styles: Ensure middle/vertical center alignment for text and items -->
+        <Style TargetType="ComboBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="6,0,0,0"/>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="6,4"/>
+        </Style>
     </Application.Resources>
 </Application>
