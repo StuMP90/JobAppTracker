@@ -4,6 +4,12 @@ A native Windows desktop application built with **C#**, **.NET 8 WPF**, and a lo
 
 > **Built with Google Antigravity**: This project was developed using **Google Antigravity**.
 
+<p align="center">
+  <a href="https://apps.microsoft.com/detail/9NNQ3MJLTRGB">
+    <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="220" alt="Get it from Microsoft Store" />
+  </a>
+</p>
+
 ![JobAppTracker Screenshot](JobApplicationTracker.jpg)
 
 ---
@@ -92,6 +98,17 @@ JobAppTracker/
 
 ---
 
+## Download & Installation
+
+The recommended way to install and keep **JobAppTracker** updated is via the Microsoft Store:
+
+[![Download from Microsoft Store](https://get.microsoft.com/images/en-us%20dark.svg)](https://apps.microsoft.com/detail/9NNQ3MJLTRGB)
+
+* **Microsoft Store**: [apps.microsoft.com/detail/9NNQ3MJLTRGB](https://apps.microsoft.com/detail/9NNQ3MJLTRGB)
+* **GitHub Releases**: Standalone installer (`JobAppTrackerSetup.exe`) available under [Releases](https://github.com/StuMP90/JobAppTracker/releases).
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -150,22 +167,22 @@ The repository is configured with a GitHub Actions workflow (`.github/workflows/
 1. **Commit and push all changes to `main`**:
    ```powershell
    git add .
-   git commit -m "Prepare release v1.0.2"
+   git commit -m "Prepare release v1.0.5"
    git push origin main
    ```
 
 2. **Create and push an annotated git tag**:
    ```powershell
-   # Create the tag (replace 1.0.2 with your target version)
-   git tag -a v1.0.2 -m "Release v1.0.2"
+   # Create the tag (replace 1.0.5 with your target version)
+   git tag -a v1.0.5 -m "Release v1.0.5"
 
    # Push the tag to GitHub
-   git push origin v1.0.2
+   git push origin v1.0.5
    ```
 
 3. **Automated CI/CD Pipeline**:
    - The workflow triggers automatically on GitHub.
-   - Extracts the version directly from the tag name (e.g. `1.0.2`).
+   - Extracts the version directly from the tag name (e.g. `1.0.5`).
    - Runs all 21 automated verification tests.
    - Publishes the 64-bit self-contained executable with the version embedded.
    - Compiles `JobAppTrackerSetup.exe` with the version stamped.
@@ -174,8 +191,8 @@ The repository is configured with a GitHub Actions workflow (`.github/workflows/
 > [!TIP]
 > If you ever need to delete or retag a release locally and remotely:
 > ```powershell
-> git tag -d v1.0.2
-> git push origin --delete v1.0.2
+> git tag -d v1.0.5
+> git push origin --delete v1.0.5
 > ```
 
 ---
