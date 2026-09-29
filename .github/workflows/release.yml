@@ -91,7 +91,7 @@ jobs:
       # Center when MSSTORE_CLIENT_SECRET is configured in GitHub Secrets.
       # -------------------------------------------------------------
       - name: Publish to Microsoft Store
-        if: startsWith(github.ref, 'refs/tags/') && secrets.MSSTORE_CLIENT_SECRET != ''
+        if: startsWith(github.ref, 'refs/tags/')
         shell: pwsh
         env:
           MSSTORE_TENANT_ID: ${{ secrets.MSSTORE_TENANT_ID }}
@@ -99,6 +99,11 @@ jobs:
           MSSTORE_CLIENT_SECRET: ${{ secrets.MSSTORE_CLIENT_SECRET }}
           MSSTORE_PRODUCT_ID: ${{ secrets.MSSTORE_PRODUCT_ID }}
         run: |
+          if ([string]::IsNullOrWhiteSpace($env:MSSTORE_CLIENT_SECRET)) {
+            Write-Host "MSSTORE_CLIENT_SECRET is not configured in GitHub Secrets. Skipping Microsoft Store upload."
+            exit 0
+          }
+
           Write-Host "Installing Microsoft Store Developer CLI..."
           winget install "Microsoft Store Developer CLI" --accept-package-agreements --accept-source-agreements --silent
           
