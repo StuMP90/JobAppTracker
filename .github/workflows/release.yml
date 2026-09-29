@@ -27,7 +27,7 @@ jobs:
         shell: pwsh
         run: |
           $raw = "${{ github.ref_name }}"
-          $ver = if ($raw -match '^v?(\d+\.\d+\.\d+.*)$') { $matches[1] } else { "1.0.2" }
+          $ver = if ($raw -match '^v?(\d+\.\d+\.\d+.*)$') { $matches[1] } else { "1.0.5" }
           echo "APP_VER=$ver" >> $env:GITHUB_ENV
           Write-Host "Configured release version: $ver"
 
@@ -51,6 +51,10 @@ jobs:
           path: installer.iss
           options: /DMyAppVersion=${{ env.APP_VER }}
 
+      - name: Build Windows Store MSIX Package
+        shell: pwsh
+        run: .\build-msix.ps1 -Version ${{ env.APP_VER }} -SkipTests
+
       # -------------------------------------------------------------
       # SIGNPATH CODE SIGNING (Uncomment after SignPath approval):
       # -------------------------------------------------------------
@@ -68,13 +72,43 @@ jobs:
       #     output-files-path: 'dist/JobAppTrackerSetup.exe'
       # -------------------------------------------------------------
 
-      - name: Create GitHub Release and Upload Installer
+      - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: Release ${{ github.ref_name }}
-          files: dist/JobAppTrackerSetup.exe
+          files: |
+            dist/JobAppTrackerSetup.exe
+            dist/JobAppTracker_*.msix
           draft: false
           prerelease: false
           generate_release_notes: true
+
+      # -------------------------------------------------------------
+      # AUTOMATED MICROSOFT STORE PUBLISHING:
+      # Automatically uploads and submits new MSIX packages to Partner
+      # Center when MSSTORE_CLIENT_SECRET is configured in GitHub Secrets.
+      # -------------------------------------------------------------
+      - name: Publish to Microsoft Store
+        if: startsWith(github.ref, 'refs/tags/') && secrets.MSSTORE_CLIENT_SECRET != ''
+        shell: pwsh
+        env:
+          MSSTORE_TENANT_ID: ${{ secrets.MSSTORE_TENANT_ID }}
+          MSSTORE_CLIENT_ID: ${{ secrets.MSSTORE_CLIENT_ID }}
+          MSSTORE_CLIENT_SECRET: ${{ secrets.MSSTORE_CLIENT_SECRET }}
+          MSSTORE_PRODUCT_ID: ${{ secrets.MSSTORE_PRODUCT_ID }}
+        run: |
+          Write-Host "Installing Microsoft Store Developer CLI..."
+          winget install "Microsoft Store Developer CLI" --accept-package-agreements --accept-source-agreements --silent
+          
+          # Refresh environment PATH for current session
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          
+          Write-Host "Configuring Store credentials..."
+          msstore reconfigure --tenantId $env:MSSTORE_TENANT_ID --clientId $env:MSSTORE_CLIENT_ID --clientSecret $env:MSSTORE_CLIENT_SECRET
+          
+          $msix = Get-ChildItem -Path "dist\JobAppTracker_*.msix" | Select-Object -First 1
+          Write-Host "Publishing $($msix.Name) to Microsoft Store..."
+          msstore publish --productId $env:MSSTORE_PRODUCT_ID --inputFile $msix.FullName
+
