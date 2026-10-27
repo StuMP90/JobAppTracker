@@ -713,8 +713,77 @@ Key Requirements:
 
                 Console.WriteLine("[PASS] Test 21: Company filtering on main dashboard and database queries verified.");
 
+                // --- TEST 22: Printable Reports Space & Paper Efficiency ---
+                Console.WriteLine("\n--- Running Test 22: Printable Reports Space & Paper Efficiency ---");
+                var printSummaryApps = db.GetApplications();
+                var printSummaryReportPath = Path.Combine(testDir, "PrintSummary_SpaceTest.html");
+                ExportService.GenerateHtmlReport(printSummaryApps, db.GetReportSummary(), null, printSummaryReportPath);
+                var printSummaryHtml = File.ReadAllText(printSummaryReportPath);
+
+                Assert(printSummaryHtml.Contains("@page"), "Summary report contains @page print styling");
+                Assert(printSummaryHtml.Contains("margin: 8mm 10mm"), "Summary report defines narrow page margins to maximize paper area");
+                Assert(printSummaryHtml.Contains("display: table-header-group"), "Summary report repeats table header on multi-page printouts");
+                Assert(printSummaryHtml.Contains("print-color-adjust: exact"), "Summary report preserves background colors for print");
+                Assert(printSummaryHtml.Contains("repeat(6, 1fr)"), "Summary report KPI grid uses single-line compact grid in print view");
+
+                var printSingleReportPath = Path.Combine(testDir, "PrintSingle_SpaceTest.html");
+                ExportService.GenerateSingleApplicationHtmlReport(singleApp1, singleUpdates1, singleAttachments1, printSingleReportPath);
+                var printSingleHtml = File.ReadAllText(printSingleReportPath);
+
+                Assert(printSingleHtml.Contains("@page"), "Single application report contains @page print styling");
+                Assert(printSingleHtml.Contains("margin: 8mm 10mm"), "Single application report defines narrow page margins");
+                Assert(!printSingleHtml.Contains(".section { break-inside: avoid; }"), "Single application report does NOT force entire section avoid-break (which caused blank pages)");
+                Assert(printSingleHtml.Contains("break-inside: auto"), "Single application report allows sections and spec-box to break naturally across pages");
+                Assert(printSingleHtml.Contains("repeat(4, 1fr)"), "Single application report details grid uses compact 4-column layout in print view");
+
+                Console.WriteLine("[PASS] Test 22: Printable reports paper efficiency and compact print layout verified.");
+
+                // --- TEST 23: 'CV Sent' entries should not be marked as stale ---
+                Console.WriteLine("\n--- Running Test 23: 'CV Sent' Entries Not Marked as Stale ---");
+                var oldCvSentDate = DateTime.Today.AddDays(-30);
+                var cvApp = new JobApplication
+                {
+                    AppliedDate = oldCvSentDate,
+                    JobTitle = "CV",
+                    IsCvToAgency = true,
+                    Company = "Austin Fraser",
+                    Agency = "Austin Fraser",
+                    Source = "Direct Email",
+                    ApplicationMethod = "Agency",
+                    CurrentStatus = "CV Sent"
+                };
+                int cvAppId = db.SaveApplication(cvApp, "Sent speculative CV.");
+                using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={testDb}"))
+                {
+                    conn.Open();
+                    using var cmd = conn.CreateCommand();
+                    cmd.CommandText = "UPDATE Applications SET LastUpdatedDate = @d WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@d", oldCvSentDate.ToString("yyyy-MM-dd"));
+                    cmd.Parameters.AddWithValue("@id", cvAppId);
+                    cmd.ExecuteNonQuery();
+                }
+
+                var reloadedCvApp = db.GetApplicationById(cvAppId)!;
+                Assert(reloadedCvApp.DaysSinceLastUpdate >= 30, "CV App is over 30 days inactive");
+                Assert(!reloadedCvApp.IsStale, "'CV Sent' application must NOT be marked as IsStale");
+                Assert(!reloadedCvApp.StalenessText.Contains("Stale"), $"StalenessText should not contain 'Stale' (got '{reloadedCvApp.StalenessText}')");
+                Assert(reloadedCvApp.StalenessText == "30d ago", $"StalenessText shows neutral inactivity ('{reloadedCvApp.StalenessText}')");
+
+                // Verify Stale filter excludes this CV Sent item
+                var staleFilterCheck = new ApplicationFilter { QuickFilter = "Stale" };
+                var staleListCheck = db.GetApplications(staleFilterCheck);
+                Assert(!staleListCheck.Any(a => a.Id == cvAppId), "QuickFilter 'Stale' does NOT return 'CV Sent' applications");
+
+                // Verify HTML report output for CV Sent does not show badge-stale
+                var cvReportPath = Path.Combine(testDir, "CvSent_Report.html");
+                ExportService.GenerateHtmlReport(new List<JobApplication> { reloadedCvApp }, db.GetReportSummary(), null, cvReportPath);
+                var cvHtml = File.ReadAllText(cvReportPath);
+                Assert(!cvHtml.Contains("class=\"badge-stale\""), "HTML report does NOT render badge-stale for 'CV Sent' entries");
+
+                Console.WriteLine("[PASS] Test 23: 'CV Sent' applications correctly excluded from staleness.");
+
                 Console.WriteLine();
-                Console.WriteLine("🎉 ALL 21 TEST SUITES PASSED PERFECTLY!");
+                Console.WriteLine("🎉 ALL 23 TEST SUITES PASSED PERFECTLY!");
                 return 0;
             }
             catch (Exception ex)

@@ -220,7 +220,7 @@ namespace JobAppTracker.Data
                         break;
                     case "Stale":
                         var thresholdDate = DateTime.Today.AddDays(-staleDays).ToString("yyyy-MM-dd");
-                        sb.Append(" AND a.IsFinal = 0 AND a.LastUpdatedDate <= @thresholdDate");
+                        sb.Append(" AND a.IsFinal = 0 AND a.CurrentStatus != 'CV Sent' COLLATE NOCASE AND a.LastUpdatedDate <= @thresholdDate");
                         cmd.Parameters.AddWithValue("@thresholdDate", thresholdDate);
                         break;
                     case "Final":
@@ -833,7 +833,7 @@ namespace JobAppTracker.Data
                 if (!app.IsFinal)
                 {
                     summary.ActiveApplications++;
-                    if (app.DaysSinceLastUpdate >= staleDays)
+                    if (app.DaysSinceLastUpdate >= staleDays && !string.Equals(app.CurrentStatus, "CV Sent", StringComparison.OrdinalIgnoreCase))
                     {
                         summary.StaleApplications++;
                     }

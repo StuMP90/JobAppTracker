@@ -33,59 +33,65 @@ namespace JobAppTracker.Services
             sb.AppendLine("<title>Job Applications Report - " + DateTime.Now.ToString("yyyy-MM-dd") + "</title>");
             sb.AppendLine("<style>");
             sb.AppendLine(@"
+                @page {
+                    size: auto;
+                    margin: 8mm 10mm;
+                }
                 body {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
                     background-color: #f8fafc;
                     color: #1e293b;
                     margin: 0;
-                    padding: 24px;
+                    padding: 16px;
+                    line-height: 1.35;
                 }
                 .container {
                     max-width: 1200px;
                     margin: 0 auto;
                     background: #ffffff;
-                    border-radius: 8px;
+                    border-radius: 6px;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    padding: 32px;
+                    padding: 20px 24px;
                 }
                 .header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     border-bottom: 2px solid #e2e8f0;
-                    padding-bottom: 16px;
-                    margin-bottom: 24px;
+                    padding-bottom: 10px;
+                    margin-bottom: 14px;
                 }
                 h1 {
                     margin: 0;
                     color: #0f172a;
-                    font-size: 26px;
+                    font-size: 22px;
                 }
                 .meta {
                     color: #64748b;
-                    font-size: 13px;
+                    font-size: 12px;
+                    margin-top: 3px;
                 }
                 .print-btn {
                     background: #2563eb;
                     color: white;
                     border: none;
-                    padding: 8px 16px;
+                    padding: 6px 14px;
                     border-radius: 6px;
                     cursor: pointer;
-                    font-size: 14px;
+                    font-size: 13px;
                     font-weight: 500;
                 }
                 .print-btn:hover { background: #1d4ed8; }
                 .kpi-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                    gap: 16px;
-                    margin-bottom: 28px;
+                    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                    gap: 10px;
+                    margin-bottom: 16px;
                 }
                 .kpi-card {
                     background: #f1f5f9;
-                    border-radius: 8px;
-                    padding: 14px 18px;
+                    border-radius: 6px;
+                    padding: 8px 12px;
                     text-align: center;
                     border-left: 4px solid #94a3b8;
                 }
@@ -93,35 +99,35 @@ namespace JobAppTracker.Services
                 .kpi-card.stale { border-left-color: #ea580c; background: #fff7ed; }
                 .kpi-card.interview { border-left-color: #d97706; }
                 .kpi-card.accepted { border-left-color: #16a34a; background: #f0fdf4; }
-                .kpi-val { font-size: 24px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+                .kpi-val { font-size: 20px; font-weight: 700; color: #0f172a; white-space: nowrap; line-height: 1.2; }
                 .kpi-card.stale .kpi-val { color: #c2410c; }
-                .kpi-total-sub { font-size: 13px; font-weight: 500; color: #64748b; margin-left: 3px; }
+                .kpi-total-sub { font-size: 12px; font-weight: 500; color: #64748b; margin-left: 3px; }
                 .kpi-card.stale .kpi-total-sub { color: #ea580c; opacity: 0.85; }
-                .kpi-label { font-size: 12px; color: #64748b; text-transform: uppercase; margin-top: 4px; }
+                .kpi-label { font-size: 11px; color: #64748b; text-transform: uppercase; margin-top: 2px; letter-spacing: 0.3px; }
                 
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 13px;
+                    font-size: 12px;
                     text-align: left;
                 }
                 th {
                     background-color: #f8fafc;
                     color: #475569;
                     font-weight: 600;
-                    padding: 10px 12px;
+                    padding: 8px 10px;
                     border-bottom: 2px solid #e2e8f0;
                 }
                 td {
-                    padding: 10px 12px;
+                    padding: 7px 10px;
                     border-bottom: 1px solid #e2e8f0;
                     vertical-align: top;
                 }
                 tr:hover { background-color: #f8fafc; }
                 .badge {
                     display: inline-block;
-                    padding: 3px 8px;
-                    border-radius: 12px;
+                    padding: 2px 7px;
+                    border-radius: 10px;
                     font-size: 11px;
                     font-weight: 600;
                     color: #fff;
@@ -130,37 +136,37 @@ namespace JobAppTracker.Services
                 .badge-stale {
                     background-color: #ea580c;
                     color: white;
-                    padding: 2px 6px;
+                    padding: 2px 5px;
                     border-radius: 4px;
-                    font-size: 11px;
+                    font-size: 10.5px;
                     font-weight: bold;
                     display: inline-block;
                     margin-top: 3px;
                 }
-                .job-title { font-weight: 600; color: #0f172a; font-size: 14px; }
+                .job-title { font-weight: 600; color: #0f172a; font-size: 13px; }
                 .company-name { color: #334155; }
-                .agency-tag { color: #64748b; font-size: 12px; }
-                .spec-snippet { color: #64748b; font-size: 12px; max-width: 320px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+                .agency-tag { color: #64748b; font-size: 11px; }
+                .spec-snippet { color: #64748b; font-size: 11.5px; max-width: 320px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
                 
                 .audit-row td {
                     background-color: #f8fafc;
-                    padding: 8px 16px 14px 28px;
+                    padding: 6px 12px 10px 24px;
                     border-bottom: 2px solid #e2e8f0;
                 }
                 .audit-box {
                     background: #ffffff;
                     border: 1px solid #e2e8f0;
                     border-left: 3px solid #3b82f6;
-                    border-radius: 6px;
-                    padding: 10px 14px;
+                    border-radius: 5px;
+                    padding: 8px 12px;
                 }
                 .audit-title {
-                    font-size: 11px;
+                    font-size: 10.5px;
                     font-weight: 700;
                     color: #475569;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
-                    margin-bottom: 6px;
+                    margin-bottom: 4px;
                 }
                 .audit-timeline {
                     list-style: none;
@@ -170,28 +176,28 @@ namespace JobAppTracker.Services
                 .audit-item {
                     display: flex;
                     align-items: baseline;
-                    padding: 4px 0;
+                    padding: 3px 0;
                     border-bottom: 1px dashed #f1f5f9;
-                    font-size: 12px;
+                    font-size: 11.5px;
                 }
                 .audit-item:last-child { border-bottom: none; }
                 .audit-date {
                     font-weight: 600;
                     color: #64748b;
-                    min-width: 85px;
-                    font-size: 11px;
+                    min-width: 80px;
+                    font-size: 10.5px;
                 }
                 .audit-event {
                     font-weight: 600;
                     color: #1e293b;
-                    min-width: 180px;
+                    min-width: 170px;
                 }
                 .audit-notes {
                     color: #475569;
                     flex: 1;
                 }
                 .audit-empty {
-                    font-size: 12px;
+                    font-size: 11px;
                     color: #94a3b8;
                     font-style: italic;
                 }
@@ -200,21 +206,21 @@ namespace JobAppTracker.Services
                     background: #ffffff;
                     border: 1px solid #e2e8f0;
                     border-left: 3px solid #6366f1;
-                    border-radius: 6px;
-                    padding: 8px 12px;
-                    font-size: 12px;
+                    border-radius: 5px;
+                    padding: 6px 10px;
+                    font-size: 11.5px;
                     display: flex;
                     align-items: center;
                     flex-wrap: wrap;
-                    gap: 6px;
+                    gap: 5px;
                 }
                 .status-summary-title {
-                    font-size: 11px;
+                    font-size: 10.5px;
                     font-weight: 700;
                     color: #475569;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
-                    margin-right: 6px;
+                    margin-right: 4px;
                 }
                 .status-step-pill {
                     display: inline-flex;
@@ -222,13 +228,13 @@ namespace JobAppTracker.Services
                     background: #f1f5f9;
                     border: 1px solid #cbd5e1;
                     border-radius: 4px;
-                    padding: 3px 8px;
-                    font-size: 11px;
+                    padding: 2px 6px;
+                    font-size: 10.5px;
                 }
                 .status-step-date {
                     font-weight: 600;
                     color: #64748b;
-                    margin-right: 5px;
+                    margin-right: 4px;
                 }
                 .status-step-name {
                     font-weight: 600;
@@ -237,15 +243,154 @@ namespace JobAppTracker.Services
                 .status-step-arrow {
                     color: #94a3b8;
                     font-weight: bold;
-                    margin: 0 3px;
+                    margin: 0 2px;
                 }
 
                 @media print {
-                    body { background: #fff; padding: 0; }
-                    .container { box-shadow: none; padding: 0; max-width: 100%; }
+                    @page {
+                        margin: 8mm 10mm;
+                        size: auto;
+                    }
+                    body {
+                        background: #fff;
+                        padding: 0;
+                        font-size: 10px;
+                        color: #0f172a;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .container {
+                        box-shadow: none;
+                        padding: 0;
+                        max-width: 100%;
+                        border-radius: 0;
+                    }
                     .print-btn { display: none; }
-                    .audit-box { break-inside: avoid; border-color: #cbd5e1; }
-                    .status-summary-box { break-inside: avoid; border-color: #cbd5e1; }
+                    .header {
+                        padding-bottom: 6px;
+                        margin-bottom: 8px;
+                    }
+                    h1 {
+                        font-size: 17px;
+                    }
+                    .meta {
+                        font-size: 9.5px;
+                    }
+                    .kpi-grid {
+                        grid-template-columns: repeat(6, 1fr);
+                        gap: 6px;
+                        margin-bottom: 8px;
+                    }
+                    .kpi-card {
+                        padding: 4px 6px;
+                        border-radius: 4px;
+                        border-left-width: 3px;
+                    }
+                    .kpi-val {
+                        font-size: 14px;
+                    }
+                    .kpi-total-sub {
+                        font-size: 9px;
+                    }
+                    .kpi-label {
+                        font-size: 8.5px;
+                        margin-top: 1px;
+                    }
+                    .filter-banner {
+                        margin-bottom: 8px !important;
+                        padding: 4px 8px !important;
+                        font-size: 9.5px !important;
+                    }
+                    table {
+                        font-size: 9.5px;
+                        line-height: 1.25;
+                    }
+                    thead {
+                        display: table-header-group;
+                    }
+                    th {
+                        padding: 4px 6px;
+                        font-size: 9.5px;
+                        background-color: #f1f5f9;
+                        border-bottom: 1.5px solid #94a3b8;
+                    }
+                    td {
+                        padding: 4px 6px;
+                        border-bottom: 1px solid #e2e8f0;
+                    }
+                    tr {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                    .job-title {
+                        font-size: 10.5px;
+                    }
+                    .company-name {
+                        font-size: 9.5px;
+                    }
+                    .agency-tag {
+                        font-size: 8.5px;
+                    }
+                    .spec-snippet {
+                        font-size: 8.5px;
+                        line-height: 1.2;
+                        max-width: none;
+                        -webkit-line-clamp: 2;
+                    }
+                    .badge {
+                        font-size: 8.5px;
+                        padding: 1px 5px;
+                    }
+                    .badge-stale {
+                        font-size: 8px;
+                        padding: 1px 4px;
+                        margin-top: 1px;
+                    }
+                    .audit-row td {
+                        padding: 3px 6px 4px 16px;
+                        background-color: #f8fafc;
+                    }
+                    .audit-box {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                        border-color: #cbd5e1;
+                        padding: 4px 8px;
+                        margin: 2px 0;
+                    }
+                    .audit-title {
+                        font-size: 8.5px;
+                        margin-bottom: 2px;
+                    }
+                    .audit-item {
+                        padding: 1.5px 0;
+                        font-size: 9px;
+                    }
+                    .audit-date {
+                        min-width: 65px;
+                        font-size: 8.5px;
+                    }
+                    .audit-event {
+                        min-width: 140px;
+                    }
+                    .status-summary-box {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                        border-color: #cbd5e1;
+                        padding: 3px 6px;
+                        margin: 2px 0;
+                        gap: 3px;
+                    }
+                    .status-summary-title {
+                        font-size: 8.5px;
+                        margin-right: 3px;
+                    }
+                    .status-step-pill {
+                        padding: 1px 4px;
+                        font-size: 8.5px;
+                    }
+                    .status-step-date {
+                        margin-right: 3px;
+                    }
                 }
             ");
             sb.AppendLine("</style>");
@@ -341,7 +486,7 @@ namespace JobAppTracker.Services
                     filterParts.Add("Audit Trail: <strong>Included</strong> (Full History)");
                 }
 
-                sb.AppendLine("<div style=\"background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-bottom: 20px; font-size: 13px; color: #475569;\">");
+                sb.AppendLine("<div class=\"filter-banner\" style=\"background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; font-size: 12px; color: #475569;\">");
                 sb.AppendLine(string.Join(" &bull; ", filterParts));
                 sb.AppendLine("</div>");
             }
@@ -615,43 +760,47 @@ namespace JobAppTracker.Services
             sb.AppendLine($"<title>{WebUtility.HtmlEncode(app.DisplayTitle)} - {WebUtility.HtmlEncode(app.Company)} Report</title>");
             sb.AppendLine("<style>");
             sb.AppendLine(@"
+                @page {
+                    size: auto;
+                    margin: 8mm 10mm;
+                }
                 body {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
                     background-color: #f8fafc;
                     color: #1e293b;
                     margin: 0;
-                    padding: 24px;
-                    line-height: 1.5;
+                    padding: 16px;
+                    line-height: 1.4;
                 }
                 .container {
                     max-width: 900px;
                     margin: 0 auto;
                     background: #ffffff;
-                    border-radius: 8px;
+                    border-radius: 6px;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    padding: 32px 36px;
+                    padding: 24px 28px;
                 }
                 .header-bar {
                     display: flex;
                     justify-content: space-between;
                     align-items: flex-start;
                     border-bottom: 2px solid #e2e8f0;
-                    padding-bottom: 20px;
-                    margin-bottom: 24px;
+                    padding-bottom: 12px;
+                    margin-bottom: 16px;
                 }
                 .title-area h1 {
-                    margin: 0 0 6px 0;
+                    margin: 0 0 4px 0;
                     color: #0f172a;
-                    font-size: 26px;
+                    font-size: 22px;
                     font-weight: 700;
                 }
                 .company-sub {
-                    font-size: 16px;
+                    font-size: 15px;
                     color: #475569;
                     font-weight: 500;
                 }
                 .agency-sub {
-                    font-size: 14px;
+                    font-size: 13px;
                     color: #64748b;
                     margin-top: 2px;
                 }
@@ -659,10 +808,10 @@ namespace JobAppTracker.Services
                     background: #2563eb;
                     color: white;
                     border: none;
-                    padding: 8px 18px;
+                    padding: 6px 14px;
                     border-radius: 6px;
                     cursor: pointer;
-                    font-size: 14px;
+                    font-size: 13px;
                     font-weight: 600;
                     white-space: nowrap;
                 }
@@ -670,14 +819,14 @@ namespace JobAppTracker.Services
                 .badges {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 8px;
-                    margin-top: 12px;
+                    gap: 6px;
+                    margin-top: 8px;
                 }
                 .badge {
                     display: inline-block;
-                    padding: 4px 10px;
+                    padding: 3px 8px;
                     border-radius: 12px;
-                    font-size: 12px;
+                    font-size: 11px;
                     font-weight: 600;
                     color: #fff;
                 }
@@ -685,36 +834,36 @@ namespace JobAppTracker.Services
                     background-color: #f1f5f9;
                     color: #475569;
                     border: 1px solid #cbd5e1;
-                    padding: 3px 9px;
-                    border-radius: 6px;
-                    font-size: 12px;
+                    padding: 2px 7px;
+                    border-radius: 5px;
+                    font-size: 11px;
                     font-weight: 500;
                 }
                 .badge-stale {
                     background-color: #ea580c;
                     color: white;
-                    padding: 4px 10px;
-                    border-radius: 6px;
-                    font-size: 12px;
+                    padding: 3px 8px;
+                    border-radius: 5px;
+                    font-size: 11px;
                     font-weight: bold;
                 }
 
                 .details-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 14px;
+                    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                    gap: 10px;
                     background: #f8fafc;
                     border: 1px solid #e2e8f0;
-                    border-radius: 8px;
-                    padding: 16px 20px;
-                    margin-bottom: 28px;
+                    border-radius: 6px;
+                    padding: 12px 16px;
+                    margin-bottom: 18px;
                 }
                 .detail-item {
                     display: flex;
                     flex-direction: column;
                 }
                 .detail-label {
-                    font-size: 11px;
+                    font-size: 10px;
                     font-weight: 700;
                     text-transform: uppercase;
                     color: #64748b;
@@ -722,7 +871,7 @@ namespace JobAppTracker.Services
                     margin-bottom: 2px;
                 }
                 .detail-val {
-                    font-size: 14px;
+                    font-size: 13px;
                     color: #0f172a;
                     font-weight: 600;
                     word-break: break-word;
@@ -736,21 +885,21 @@ namespace JobAppTracker.Services
                 }
 
                 .section {
-                    margin-bottom: 28px;
+                    margin-bottom: 18px;
                 }
                 .section-header {
-                    font-size: 17px;
+                    font-size: 15px;
                     font-weight: 700;
                     color: #0f172a;
                     border-bottom: 1px solid #e2e8f0;
-                    padding-bottom: 8px;
-                    margin-bottom: 14px;
+                    padding-bottom: 6px;
+                    margin-bottom: 10px;
                     display: flex;
                     justify-content: space-between;
                     align-items: baseline;
                 }
                 .section-count {
-                    font-size: 12px;
+                    font-size: 11px;
                     font-weight: 600;
                     color: #64748b;
                 }
@@ -758,12 +907,12 @@ namespace JobAppTracker.Services
                 .spec-box {
                     background: #fcfcfd;
                     border: 1px solid #e2e8f0;
-                    border-left: 4px solid #3b82f6;
-                    border-radius: 6px;
-                    padding: 16px 20px;
+                    border-left: 3px solid #3b82f6;
+                    border-radius: 5px;
+                    padding: 12px 16px;
                     white-space: pre-wrap;
-                    font-size: 13px;
-                    line-height: 1.6;
+                    font-size: 12px;
+                    line-height: 1.45;
                     color: #334155;
                     font-family: inherit;
                     max-height: 600px;
@@ -773,84 +922,224 @@ namespace JobAppTracker.Services
                 .empty-notice {
                     color: #94a3b8;
                     font-style: italic;
-                    font-size: 13px;
+                    font-size: 12px;
                     background: #f8fafc;
                     border: 1px dashed #cbd5e1;
-                    padding: 14px;
-                    border-radius: 6px;
+                    padding: 10px;
+                    border-radius: 5px;
                     text-align: center;
                 }
 
                 .event-table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 13px;
+                    font-size: 12px;
                 }
                 .event-table th {
                     background-color: #f8fafc;
                     color: #475569;
                     font-weight: 600;
-                    padding: 8px 12px;
+                    padding: 6px 10px;
                     text-align: left;
                     border-bottom: 2px solid #e2e8f0;
-                    font-size: 12px;
+                    font-size: 11.5px;
                 }
                 .event-table td {
-                    padding: 10px 12px;
+                    padding: 6px 10px;
                     border-bottom: 1px solid #f1f5f9;
                     vertical-align: top;
                 }
                 .event-table tr:hover { background-color: #f8fafc; }
-                .event-date { font-weight: 600; color: #475569; white-space: nowrap; width: 100px; }
-                .event-type { font-weight: 600; color: #0f172a; width: 220px; }
+                .event-date { font-weight: 600; color: #475569; white-space: nowrap; width: 90px; }
+                .event-type { font-weight: 600; color: #0f172a; width: 200px; }
                 .event-notes { color: #334155; white-space: pre-wrap; }
 
                 .doc-table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 13px;
+                    font-size: 12px;
                 }
                 .doc-table th {
                     background-color: #f8fafc;
                     color: #475569;
                     font-weight: 600;
-                    padding: 8px 12px;
+                    padding: 6px 10px;
                     text-align: left;
                     border-bottom: 2px solid #e2e8f0;
-                    font-size: 12px;
+                    font-size: 11.5px;
                 }
                 .doc-table td {
-                    padding: 10px 12px;
+                    padding: 6px 10px;
                     border-bottom: 1px solid #f1f5f9;
                     vertical-align: middle;
                 }
                 .doc-name { font-weight: 600; color: #0f172a; }
-                .doc-meta { color: #64748b; font-size: 12px; }
+                .doc-meta { color: #64748b; font-size: 11.5px; }
                 .doc-note {
-                    font-size: 11px;
+                    font-size: 10.5px;
                     color: #64748b;
-                    margin-top: 6px;
+                    margin-top: 4px;
                     font-style: italic;
                 }
 
                 .footer {
-                    margin-top: 36px;
-                    padding-top: 16px;
+                    margin-top: 22px;
+                    padding-top: 10px;
                     border-top: 1px solid #e2e8f0;
                     display: flex;
                     justify-content: space-between;
-                    font-size: 11px;
+                    font-size: 10px;
                     color: #94a3b8;
                 }
 
                 @media print {
-                    body { background: #fff; padding: 0; }
-                    .container { box-shadow: none; padding: 0; max-width: 100%; }
+                    @page {
+                        margin: 8mm 10mm;
+                        size: auto;
+                    }
+                    body {
+                        background: #fff;
+                        padding: 0;
+                        font-size: 9.5px;
+                        color: #0f172a;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .container {
+                        box-shadow: none;
+                        padding: 0;
+                        max-width: 100%;
+                        border-radius: 0;
+                    }
                     .print-btn { display: none; }
-                    .spec-box { max-height: none; overflow: visible; border-color: #cbd5e1; }
-                    .section { break-inside: avoid; }
-                    .event-table tr { break-inside: avoid; }
-                    .doc-table tr { break-inside: avoid; }
+                    .header-bar {
+                        padding-bottom: 6px;
+                        margin-bottom: 8px;
+                        border-bottom: 1.5px solid #cbd5e1;
+                    }
+                    .title-area h1 {
+                        font-size: 16px;
+                        margin: 0 0 2px 0;
+                    }
+                    .company-sub {
+                        font-size: 12px;
+                    }
+                    .agency-sub {
+                        font-size: 10.5px;
+                    }
+                    .badges {
+                        margin-top: 4px;
+                        gap: 4px;
+                    }
+                    .badge {
+                        font-size: 8.5px;
+                        padding: 1px 5px;
+                    }
+                    .badge-pill {
+                        font-size: 8.5px;
+                        padding: 1px 5px;
+                    }
+                    .badge-stale {
+                        font-size: 8px;
+                        padding: 1px 4px;
+                    }
+                    .details-grid {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 4px 8px;
+                        padding: 6px 10px;
+                        margin-bottom: 8px;
+                        border-radius: 4px;
+                    }
+                    .detail-label {
+                        font-size: 8px;
+                        margin-bottom: 1px;
+                    }
+                    .detail-val {
+                        font-size: 10px;
+                    }
+                    .section {
+                        margin-bottom: 8px;
+                        break-inside: auto;
+                        page-break-inside: auto;
+                    }
+                    .section-header {
+                        font-size: 11px;
+                        padding-bottom: 2px;
+                        margin-bottom: 4px;
+                        break-after: avoid;
+                        page-break-after: avoid;
+                    }
+                    .section-count {
+                        font-size: 9px;
+                    }
+                    .spec-box {
+                        padding: 6px 8px;
+                        font-size: 9px;
+                        line-height: 1.35;
+                        max-height: none;
+                        overflow: visible;
+                        border-color: #cbd5e1;
+                        break-inside: auto;
+                        page-break-inside: auto;
+                    }
+                    .empty-notice {
+                        padding: 6px;
+                        font-size: 9px;
+                    }
+                    .event-table {
+                        font-size: 9px;
+                    }
+                    .event-table thead {
+                        display: table-header-group;
+                    }
+                    .event-table th {
+                        padding: 3px 6px;
+                        font-size: 9px;
+                        background-color: #f1f5f9;
+                        border-bottom: 1.5px solid #94a3b8;
+                    }
+                    .event-table td {
+                        padding: 3px 6px;
+                        font-size: 9px;
+                        line-height: 1.25;
+                    }
+                    .event-table tr {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                    .event-date { width: 75px; }
+                    .event-type { width: 140px; }
+                    .doc-table {
+                        font-size: 9px;
+                    }
+                    .doc-table thead {
+                        display: table-header-group;
+                    }
+                    .doc-table th {
+                        padding: 3px 6px;
+                        font-size: 9px;
+                        background-color: #f1f5f9;
+                        border-bottom: 1.5px solid #94a3b8;
+                    }
+                    .doc-table td {
+                        padding: 3px 6px;
+                        font-size: 9px;
+                    }
+                    .doc-table tr {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+                    .doc-note {
+                        font-size: 8.5px;
+                        margin-top: 2px;
+                    }
+                    .footer {
+                        margin-top: 10px;
+                        padding-top: 4px;
+                        font-size: 8px;
+                        border-top: 1px solid #cbd5e1;
+                    }
                 }
             ");
             sb.AppendLine("</style>");

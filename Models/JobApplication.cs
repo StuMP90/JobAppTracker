@@ -29,13 +29,19 @@ namespace JobAppTracker.Models
 
         public int DaysSinceLastUpdate => Math.Max(0, (DateTime.Today - LastUpdatedDate.Date).Days);
 
-        public bool IsStale => !IsFinal && DaysSinceLastUpdate >= 14;
+        public bool IsStale => !IsFinal && !string.Equals(CurrentStatus, "CV Sent", StringComparison.OrdinalIgnoreCase) && DaysSinceLastUpdate >= 14;
 
         public string StalenessText
         {
             get
             {
                 if (IsFinal) return "Closed / Final";
+                if (string.Equals(CurrentStatus, "CV Sent", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (DaysSinceLastUpdate == 0) return "Updated today";
+                    if (DaysSinceLastUpdate == 1) return "Updated yesterday";
+                    return $"{DaysSinceLastUpdate}d ago";
+                }
                 if (DaysSinceLastUpdate == 0) return "Updated today";
                 if (DaysSinceLastUpdate == 1) return "Updated yesterday";
                 if (DaysSinceLastUpdate >= 14) return $"⚠️ Stale ({DaysSinceLastUpdate}d inactive)";
