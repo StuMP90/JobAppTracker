@@ -35,7 +35,7 @@ if (-not $SkipTests) {
 
 # 2. Publish Self-Contained Release
 Write-Host "`n[2/4] Publishing self-contained 64-bit application (v$Version)..." -ForegroundColor Yellow
-$PublishDir = "$ProjectRoot\bin\Release\net8.0-windows\win-x64\publish"
+$PublishDir = "$ProjectRoot\bin\Release\net10.0-windows\win-x64\publish"
 if (Test-Path $PublishDir) {
     Remove-Item -Recurse -Force $PublishDir -ErrorAction SilentlyContinue
 }

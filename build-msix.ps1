@@ -84,7 +84,7 @@ if (-not $SkipTests) {
 
 # 4. Publish Self-Contained 64-bit App
 Write-Host "`n[2/5] Publishing self-contained 64-bit application (v$VersionQuad)..." -ForegroundColor Yellow
-$LayoutDir = "$ProjectRoot\bin\Release\net8.0-windows\win-x64\msix-layout"
+$LayoutDir = "$ProjectRoot\bin\Release\net10.0-windows\win-x64\msix-layout"
 if (Test-Path $LayoutDir) {
     Remove-Item -Recurse -Force $LayoutDir -ErrorAction SilentlyContinue
 }
