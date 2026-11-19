@@ -383,6 +383,8 @@ Key Requirements:
                 // --- TEST 15: New Statuses Handling ("Closed due to inactivity", "Discussed, bad fit", "Employer changed role") ---
                 Console.WriteLine("\n--- Running Test 15: New Statuses Handling ---");
                 var distinctStatuses = db.GetDistinctStatuses();
+                Assert(distinctStatuses.Contains("Conversation"), "Distinct statuses contains 'Conversation'");
+                Assert(!DatabaseService.IsFinalStatus("Conversation"), "'Conversation' is recognized as active (not final)");
                 Assert(distinctStatuses.Contains("Closed due to inactivity"), "Distinct statuses contains 'Closed due to inactivity'");
                 Assert(distinctStatuses.Contains("Discussed, bad fit"), "Distinct statuses contains 'Discussed, bad fit'");
                 Assert(distinctStatuses.Contains("Employer changed role"), "Distinct statuses contains 'Employer changed role'");

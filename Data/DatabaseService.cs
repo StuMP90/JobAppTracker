@@ -1036,6 +1036,7 @@ namespace JobAppTracker.Data
             {
                 "Applied",
                 "CV Sent",
+                "Conversation",
                 "Screening",
                 "1st Interview",
                 "2nd Interview",

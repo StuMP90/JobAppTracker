@@ -154,6 +154,7 @@ namespace JobAppTracker.Models
                 {
                     "Applied" => "#2563EB",            // Blue
                     "CV Sent" => "#0284C7",            // Sky Blue
+                    "Conversation" => "#0D9488",       // Teal
                     "Screening" => "#7C3AED",          // Purple
                     "1st Interview" => "#D97706",      // Amber
                     "2nd Interview" => "#D97706",      // Amber
